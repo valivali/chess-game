@@ -3,7 +3,6 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 
 import Celebration from "./Celebration"
 
-// Mock window dimensions for confetti and fireworks
 Object.defineProperty(window, "innerWidth", {
   writable: true,
   configurable: true,

@@ -1,0 +1,169 @@
+// Game page styles
+.game {
+  &__container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--color-slate-700), var(--color-slate-800), var(--color-gray-900));
+    padding: 1rem;
+
+    @media (min-width: 640px) {
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      padding: 2rem;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    max-width: 112rem;
+    margin-left: auto;
+    margin-right: auto;
+
+    @media (min-width: 640px) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__back-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.875rem;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(-2px);
+    }
+
+    @media (min-width: 640px) {
+      font-size: 1rem;
+    }
+  }
+
+  &__back-arrow {
+    margin-right: 0.5rem;
+
+    @media (max-width: 639px) {
+      margin-right: 0;
+    }
+  }
+
+  &__back-text {
+    @media (max-width: 639px) {
+      display: none;
+    }
+  }
+
+  &__title {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+
+    @media (min-width: 640px) {
+      font-size: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 1.875rem;
+    }
+  }
+
+  &__spacer {
+    width: 5rem;
+
+    @media (min-width: 640px) {
+      width: 6rem;
+    }
+  }
+
+  &__content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 112rem;
+    margin: 0 auto;
+  }
+
+  &__board-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    box-shadow: var(--shadow-2xl);
+    border: none;
+    width: 100%;
+    max-width: 24rem;
+    aspect-ratio: 1;
+    border-radius: 1rem;
+
+    @media (min-width: 640px) {
+      max-width: 32rem;
+      border-radius: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      max-width: 42rem;
+    }
+  }
+
+  &__board-content {
+    padding: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    @media (min-width: 640px) {
+      padding: 3rem;
+    }
+
+    @media (min-width: 1024px) {
+      padding: 4rem;
+    }
+  }
+
+  &__placeholder {
+    text-align: center;
+  }
+
+  &__chess-icon {
+    font-size: 3.75rem;
+    margin-bottom: 1rem;
+
+    @media (min-width: 640px) {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 6rem;
+    }
+  }
+
+  &__board-title {
+    font-size: 1.125rem;
+    color: var(--color-gray-600);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+
+    @media (min-width: 640px) {
+      font-size: 1.25rem;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__board-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+
+    @media (min-width: 640px) {
+      font-size: 1rem;
+    }
+  }
+}

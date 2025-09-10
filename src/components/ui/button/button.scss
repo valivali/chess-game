@@ -1,0 +1,227 @@
+// Button component styles
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  border: none;
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-emerald-500);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  // Variants
+  &--default {
+    background-color: var(--color-emerald-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+
+    &:hover {
+      background-color: var(--color-emerald-600);
+      box-shadow: var(--shadow-lg);
+    }
+
+    &:active {
+      background-color: var(--color-emerald-700);
+    }
+  }
+
+  &--destructive {
+    background-color: var(--color-red-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+
+    &:hover {
+      background-color: var(--color-red-600);
+      box-shadow: var(--shadow-lg);
+    }
+
+    &:active {
+      background-color: var(--color-red-700);
+    }
+  }
+
+  &--outline {
+    border: 2px solid var(--color-emerald-500);
+    background-color: transparent;
+    color: var(--color-emerald-600);
+
+    &:hover {
+      background-color: #f0fdf4;
+      border-color: var(--color-emerald-600);
+    }
+
+    &:active {
+      background-color: #dcfce7;
+    }
+  }
+
+  &--secondary {
+    background-color: var(--color-slate-200);
+    color: var(--color-slate-800);
+    box-shadow: var(--shadow-sm);
+
+    &:hover {
+      background-color: var(--color-slate-300);
+      box-shadow: var(--shadow-md);
+    }
+
+    &:active {
+      background-color: var(--color-slate-400);
+    }
+  }
+
+  &--ghost {
+    color: var(--color-emerald-600);
+    background-color: transparent;
+
+    &:hover {
+      background-color: #f0fdf4;
+      color: var(--color-emerald-700);
+    }
+
+    &:active {
+      background-color: #dcfce7;
+    }
+  }
+
+  &--link {
+    color: var(--color-emerald-600);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    background-color: transparent;
+
+    &:hover {
+      text-decoration: underline;
+      color: var(--color-emerald-700);
+    }
+  }
+
+  &--gradient {
+    background: linear-gradient(
+      to right,
+      var(--color-emerald-400),
+      var(--color-teal-500),
+      var(--color-blue-500)
+    );
+    color: white;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(0);
+
+    &:hover {
+      background: linear-gradient(
+        to right,
+        var(--color-emerald-500),
+        var(--color-teal-600),
+        var(--color-blue-600)
+      );
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-4px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.95);
+    }
+  }
+
+  &--warm {
+    background: linear-gradient(
+      to right,
+      var(--color-orange-400),
+      var(--color-pink-400)
+    );
+    color: white;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(0);
+
+    &:hover {
+      background: linear-gradient(
+        to right,
+        var(--color-orange-500),
+        var(--color-pink-500)
+      );
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-4px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.95);
+    }
+  }
+
+  // Sizes
+  &--sm {
+    height: 2rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+
+    @media (min-width: 640px) {
+      height: 2.25rem;
+      padding: 0.25rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  &--default-size {
+    height: 2.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+
+    @media (min-width: 640px) {
+      padding: 0.5rem 1.5rem;
+    }
+  }
+
+  &--lg {
+    height: 3rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+
+    @media (min-width: 640px) {
+      height: 3.5rem;
+      padding: 0.75rem 2rem;
+      font-size: 1.125rem;
+    }
+  }
+
+  &--xl {
+    height: 3.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border-radius: 9999px;
+
+    @media (min-width: 640px) {
+      height: 4rem;
+      padding: 1rem 3rem;
+      font-size: 1.25rem;
+    }
+  }
+
+  &--icon {
+    height: 2.5rem;
+    width: 2.5rem;
+
+    @media (min-width: 640px) {
+      height: 3rem;
+      width: 3rem;
+    }
+  }
+}

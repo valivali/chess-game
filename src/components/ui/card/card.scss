@@ -1,0 +1,38 @@
+// Card component styles
+.card {
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #1f2937;
+  box-shadow: var(--shadow-sm);
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1.5rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  &__description {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  &__content {
+    padding: 1.5rem;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    padding-top: 0;
+  }
+}

@@ -1,0 +1,15 @@
+// Separator component styles
+.separator {
+  flex-shrink: 0;
+  background-color: #e5e7eb;
+
+  &--horizontal {
+    height: 1px;
+    width: 100%;
+  }
+
+  &--vertical {
+    height: 100%;
+    width: 1px;
+  }
+}

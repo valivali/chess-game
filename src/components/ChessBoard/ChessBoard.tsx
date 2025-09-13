@@ -31,15 +31,12 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
   const [showCelebration, setShowCelebration] = useState(false)
   const [winner, setWinner] = useState<PieceColor | null>(null)
 
-  // Helper function to generate CSS class names for game status
   const getGameStatusClassName = (status: GameStatus): string => {
     return `chess-board-game-status chess-board-game-status--${status}`
   }
 
-  // Handle celebration completion / new game
   const handleCelebrationComplete = useCallback(() => {
     setShowCelebration(false)
-    // Reset the game to initial state
     setBoard(createInitialBoard())
     setSelectedSquare(null)
     setValidMoves([])
@@ -58,24 +55,18 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
 
       if (!piece) return
 
-      // Check if this is an en passant capture
       const isEnPassant = isEnPassantCapture(piece, from, to, enPassantTarget)
 
-      // Handle en passant capture
       if (isEnPassant) {
-        // Remove the captured pawn (which is on the same rank as the moving pawn)
         newBoard[from.x][to.y] = null
-        console.log(`${piece.color} captures pawn en passant!`)
       }
 
       // Move the piece
       newBoard[to.x][to.y] = piece
       newBoard[from.x][from.y] = null
 
-      // Set en passant target if pawn moved two squares
       let newEnPassantTarget: Position | null = null
       if (piece.type === "pawn" && Math.abs(to.x - from.x) === 2) {
-        // Set en passant target to the square the pawn "jumped over"
         newEnPassantTarget = {
           x: from.x + (to.x - from.x) / 2,
           y: from.y

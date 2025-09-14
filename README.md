@@ -30,7 +30,7 @@ Make sure you have [Node.js](https://nodejs.org/) (version 16 or higher) install
 1. **Clone the repository**
 
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/valivali/chess-game.git
    cd chess-game
    ```
 

@@ -1,7 +1,6 @@
-// Separator component styles
 .separator {
   flex-shrink: 0;
-  background-color: #e5e7eb;
+  background-color: var(--color-border-primary);
 
   &--horizontal {
     height: 1px;

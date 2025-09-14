@@ -22,7 +22,7 @@ interface ChessBoardProps {
 
 function ChessBoard({ className = "" }: ChessBoardProps) {
   const [board, setBoard] = useState<ChessBoardType>(createInitialBoard)
-  const [selectedSquare, setSelectedSquare] = useState<Position | null>(null)
+  const [selectedPiecePosition, setSelectedPiecePosition] = useState<Position | null>(null)
   const [validMoves, setValidMoves] = useState<Position[]>([])
   const [currentPlayer, setCurrentPlayer] = useState<PieceColor>("white")
   const [draggedPiece, setDraggedPiece] = useState<{ piece: ChessPieceType; from: Position } | null>(null)
@@ -38,7 +38,7 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
   const handleCelebrationComplete = useCallback(() => {
     setShowCelebration(false)
     setBoard(createInitialBoard())
-    setSelectedSquare(null)
+    setSelectedPiecePosition(null)
     setValidMoves([])
     setCurrentPlayer("white")
     setDraggedPiece(null)
@@ -51,7 +51,6 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
     (from: Position, to: Position) => {
       const newBoard = board.map((row) => [...row])
       const piece = newBoard[from.x][from.y]
-      const capturedPiece = newBoard[to.x][to.y]
 
       if (!piece) return
 
@@ -76,7 +75,7 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
       const nextPlayer = currentPlayer === "white" ? "black" : "white"
 
       setBoard(newBoard)
-      setSelectedSquare(null)
+      setSelectedPiecePosition(null)
       setValidMoves([])
       setCurrentPlayer(nextPlayer)
       setEnPassantTarget(newEnPassantTarget)
@@ -92,74 +91,55 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
         newGameStatus = GAME_STATUS.CHECKMATE
         setWinner(currentPlayer)
         setShowCelebration(true)
-        console.log(`Checkmate! ${currentPlayer} wins!`)
       } else if (nextPlayerStalemate) {
         newGameStatus = GAME_STATUS.STALEMATE
-        console.log("Stalemate! The game is a draw.")
       } else if (nextPlayerInCheck) {
         newGameStatus = GAME_STATUS.CHECK
-        console.log(`${nextPlayer} is in check!`)
       }
 
       setGameStatus(newGameStatus)
-
-      // Log move for now (could be replaced with toast notifications later)
-      if (isEnPassant) {
-        // Already logged above
-      } else if (capturedPiece) {
-        console.log(`${piece.color} captures ${capturedPiece.type}!`)
-      } else {
-        console.log(`${piece.color} ${piece.type} moves`)
-      }
     },
     [board, currentPlayer, enPassantTarget]
   )
 
   const handleSquareClick = useCallback(
     (position: Position) => {
-      // Prevent moves if game is over
       if (gameStatus === GAME_STATUS.CHECKMATE || gameStatus === GAME_STATUS.STALEMATE) {
         return
       }
 
       const piece = board[position.x][position.y]
 
-      // If a square is already selected
-      if (selectedSquare) {
-        // If clicking on a valid move
+      if (selectedPiecePosition) {
         if (validMoves.some((move) => isPositionEqual(move, position))) {
-          makeMove(selectedSquare, position)
+          makeMove(selectedPiecePosition, position)
           return
         }
 
-        // If clicking on the same square, deselect
-        if (isPositionEqual(selectedSquare, position)) {
-          setSelectedSquare(null)
+        if (isPositionEqual(selectedPiecePosition, position)) {
+          setSelectedPiecePosition(null)
           setValidMoves([])
           return
         }
 
-        // If clicking on another piece of the same color, select it
         if (piece && piece.color === currentPlayer) {
           const moves = getLegalMoves(piece, position, board, enPassantTarget)
-          setSelectedSquare(position)
+          setSelectedPiecePosition(position)
           setValidMoves(moves)
           return
         }
 
-        // Otherwise, deselect
-        setSelectedSquare(null)
+        setSelectedPiecePosition(null)
         setValidMoves([])
       } else {
-        // No square selected, select if it's current player's piece
         if (piece && piece.color === currentPlayer) {
           const moves = getLegalMoves(piece, position, board, enPassantTarget)
-          setSelectedSquare(position)
+          setSelectedPiecePosition(position)
           setValidMoves(moves)
         }
       }
     },
-    [board, selectedSquare, validMoves, currentPlayer, makeMove, enPassantTarget, gameStatus]
+    [board, selectedPiecePosition, validMoves, currentPlayer, makeMove, enPassantTarget, gameStatus]
   )
 
   const handleDragStart = useCallback(
@@ -170,7 +150,7 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
       }
 
       setDraggedPiece({ piece, from: position })
-      setSelectedSquare(position)
+      setSelectedPiecePosition(position)
       setValidMoves(getLegalMoves(piece, position, board, enPassantTarget))
     },
     [currentPlayer, board, enPassantTarget, gameStatus]
@@ -207,7 +187,6 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
   return (
     <div className="chess-board-container">
       <div className="chess-board-header">
-        <h2 className="chess-board-title">Chess Game</h2>
         {gameStatus === GAME_STATUS.CHECKMATE ? (
           <p className={getGameStatusClassName(GAME_STATUS.CHECKMATE)}>Checkmate! {currentPlayer === "white" ? "Black" : "White"} wins!</p>
         ) : gameStatus === GAME_STATUS.STALEMATE ? (
@@ -215,7 +194,7 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
         ) : (
           <div>
             <p className="chess-board-current-player">
-              Current Player: <span className="chess-board-player-name">{currentPlayer}</span>
+              <span className="chess-board-player-name">{currentPlayer === "white" ? "White" : "Black"}</span>'s turn
             </p>
             {gameStatus === GAME_STATUS.CHECK && <p className={getGameStatusClassName(GAME_STATUS.CHECK)}>{currentPlayer} is in check!</p>}
           </div>
@@ -227,7 +206,7 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
           row.map((piece, colIndex) => {
             const position = { x: rowIndex, y: colIndex }
             const isLight = (rowIndex + colIndex) % 2 === 0
-            const isSelected = selectedSquare && isPositionEqual(selectedSquare, position)
+            const isSelected = selectedPiecePosition && isPositionEqual(selectedPiecePosition, position)
             const isValidMove = validMoves.some((move) => isPositionEqual(move, position))
             const isHighlighted = isSquareHighlighted(position)
 
@@ -255,7 +234,6 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
         <p>You can also drag and drop pieces to move them.</p>
       </div>
 
-      {/* Celebration overlay */}
       {showCelebration && winner && <Celebration winner={winner} onComplete={handleCelebrationComplete} />}
     </div>
   )

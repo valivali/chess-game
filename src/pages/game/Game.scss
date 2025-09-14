@@ -1,9 +1,12 @@
-// Game page styles
 .game {
   &__container {
     min-height: 100vh;
     background: linear-gradient(135deg, var(--color-slate-700), var(--color-slate-800), var(--color-gray-900));
-    padding: 1rem;
+    padding: 0.75rem;
+
+    @media (min-width: 320px) {
+      padding: 1rem;
+    }
 
     @media (min-width: 640px) {
       padding: 1.5rem;
@@ -30,7 +33,7 @@
 
   &__back-button {
     background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    color: var(--color-text-inverse);
     border: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.875rem;
 
@@ -59,7 +62,7 @@
   }
 
   &__title {
-    color: white;
+    color: var(--color-text-inverse);
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
@@ -85,7 +88,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 112rem;
     margin: 0 auto;
   }
 
@@ -94,34 +96,42 @@
     backdrop-filter: blur(4px);
     box-shadow: var(--shadow-2xl);
     border: none;
-    width: 100%;
-    max-width: 24rem;
     aspect-ratio: 1;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
 
-    @media (min-width: 640px) {
-      max-width: 32rem;
-      border-radius: 1.5rem;
+    @media (min-width: 320px) {
+      border-radius: 1rem;
     }
 
-    @media (min-width: 1024px) {
-      max-width: 42rem;
+    @media (min-width: 640px) {
+      border-radius: 1.5rem;
     }
   }
 
   &__board-content {
-    padding: none;
+    padding: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+
+    @media (min-width: 320px) {
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 480px) {
+      padding: 1rem;
+    }
 
     @media (min-width: 640px) {
-      padding: 3rem;
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      padding: 2rem;
     }
 
     @media (min-width: 1024px) {
-      padding: 4rem;
+      padding: 3rem;
     }
   }
 
@@ -145,7 +155,7 @@
 
   &__board-title {
     font-size: 1.125rem;
-    color: var(--color-gray-600);
+    color: var(--color-text-secondary);
     font-weight: 500;
     margin-bottom: 0.5rem;
 
@@ -160,7 +170,7 @@
 
   &__board-subtitle {
     font-size: 0.875rem;
-    color: var(--color-gray-500);
+    color: var(--color-text-muted);
 
     @media (min-width: 640px) {
       font-size: 1rem;

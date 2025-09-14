@@ -43,7 +43,7 @@
   font-size: 3rem;
   font-weight: bold;
   margin: 0 0 1rem 0;
-  background: linear-gradient(45deg, #ffd700, #ffa500, #ff6347);
+  background: linear-gradient(45deg, var(--color-gold-400), var(--color-orange-300), var(--color-red-orange-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -53,15 +53,15 @@
 
 .celebration-subtitle {
   font-size: 1.5rem;
-  color: #333;
+  color: var(--color-gray-700);
   margin: 0 0 2rem 0;
   font-weight: 600;
 }
 
 .celebration-button {
-  background: linear-gradient(45deg, #4caf50, #45a049);
+  background: linear-gradient(45deg, var(--color-material-green-400), var(--color-material-green-500));
   border: none;
-  color: white;
+  color: var(--color-text-inverse);
   padding: 1rem 2rem;
   font-size: 1.25rem;
   font-weight: bold;
@@ -73,7 +73,7 @@
   letter-spacing: 1px;
 
   &:hover {
-    background: linear-gradient(45deg, #45a049, #4caf50);
+    background: linear-gradient(45deg, var(--color-material-green-500), var(--color-material-green-400));
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
   }

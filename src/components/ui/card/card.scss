@@ -1,9 +1,8 @@
-// Card component styles
 .card {
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  background-color: #ffffff;
-  color: #1f2937;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
   box-shadow: var(--shadow-sm);
 
   &__header {
@@ -22,7 +21,7 @@
 
   &__description {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--color-text-secondary);
   }
 
   &__content {

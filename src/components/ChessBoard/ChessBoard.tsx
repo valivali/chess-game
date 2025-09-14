@@ -1,20 +1,32 @@
 import "./ChessBoard.scss"
 
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 
 import {
   createInitialBoard,
+  createInitialCastlingRights,
+  getCastlingSide,
   getLegalMoves,
+  isCastlingMove,
   isCheckmate,
   isEnPassantCapture,
   isInCheck,
   isPositionEqual,
-  isStalemate
+  isStalemate,
+  updateCastlingRights
 } from "../../utils/chess"
+import Captivity from "../Captivity"
 import Celebration from "../Celebration"
 import ChessSquare from "../ChessSquare"
-import type { ChessBoard as ChessBoardType, ChessPiece as ChessPieceType, GameStatus, PieceColor, Position } from "./types"
-import { GAME_STATUS } from "./types"
+import type {
+  CastlingRights,
+  ChessBoard as ChessBoardType,
+  ChessPiece as ChessPieceType,
+  GameStatus,
+  PieceColor,
+  Position
+} from "./chessBoard.types"
+import { CASTLING_SIDE, GAME_STATUS } from "./chessBoard.types"
 
 interface ChessBoardProps {
   className?: string
@@ -30,6 +42,21 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
   const [gameStatus, setGameStatus] = useState<GameStatus>(GAME_STATUS.PLAYING)
   const [showCelebration, setShowCelebration] = useState(false)
   const [winner, setWinner] = useState<PieceColor | null>(null)
+  const [whiteCapturedPieces, setWhiteCapturedPieces] = useState<ChessPieceType[]>([])
+  const [blackCapturedPieces, setBlackCapturedPieces] = useState<ChessPieceType[]>([])
+  const [castlingRights, setCastlingRights] = useState<CastlingRights>(createInitialCastlingRights)
+
+  const scoreAdvantages = useMemo(() => {
+    const whiteScore = whiteCapturedPieces.reduce((sum, piece) => sum + piece.weight, 0)
+    const blackScore = blackCapturedPieces.reduce((sum, piece) => sum + piece.weight, 0)
+    const whiteDifference = whiteScore - blackScore
+    const blackDifference = blackScore - whiteScore
+
+    return {
+      whiteAdvantage: whiteDifference > 0 ? whiteDifference : undefined,
+      blackAdvantage: blackDifference > 0 ? blackDifference : undefined
+    }
+  }, [whiteCapturedPieces, blackCapturedPieces])
 
   const getGameStatusClassName = (status: GameStatus): string => {
     return `chess-board-game-status chess-board-game-status--${status}`
@@ -45,6 +72,9 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
     setEnPassantTarget(null)
     setGameStatus(GAME_STATUS.PLAYING)
     setWinner(null)
+    setWhiteCapturedPieces([])
+    setBlackCapturedPieces([])
+    setCastlingRights(createInitialCastlingRights())
   }, [])
 
   const makeMove = useCallback(
@@ -54,23 +84,59 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
 
       if (!piece) return
 
+      const isCastling = isCastlingMove(from, to, piece)
       const isEnPassant = isEnPassantCapture(piece, from, to, enPassantTarget)
+      let capturedPiece: ChessPieceType | null = null
 
-      if (isEnPassant) {
-        newBoard[from.x][to.y] = null
-      }
+      if (isCastling) {
+        // Handle castling move
+        const side = getCastlingSide(from, to)
+        const kingRow = piece.color === "white" ? 7 : 0
+        const rookFromCol = side === CASTLING_SIDE.KINGSIDE ? 7 : 0
+        const rookToCol = side === CASTLING_SIDE.KINGSIDE ? 5 : 3
 
-      // Move the piece
-      newBoard[to.x][to.y] = piece
-      newBoard[from.x][from.y] = null
+        // Move king
+        newBoard[to.x][to.y] = piece
+        newBoard[from.x][from.y] = null
 
-      let newEnPassantTarget: Position | null = null
-      if (piece.type === "pawn" && Math.abs(to.x - from.x) === 2) {
-        newEnPassantTarget = {
-          x: from.x + (to.x - from.x) / 2,
-          y: from.y
+        // Move rook
+        const rook = newBoard[kingRow][rookFromCol]
+        if (rook) {
+          newBoard[kingRow][rookToCol] = rook
+          newBoard[kingRow][rookFromCol] = null
         }
+      } else {
+        // Handle regular move or en passant
+        capturedPiece = isEnPassant ? newBoard[from.x][to.y] : newBoard[to.x][to.y]
+
+        if (isEnPassant) {
+          newBoard[from.x][to.y] = null
+        }
+
+        newBoard[to.x][to.y] = piece
+        newBoard[from.x][from.y] = null
       }
+
+      const newWhiteCaptured =
+        capturedPiece && currentPlayer === "white"
+          ? [...whiteCapturedPieces, capturedPiece].sort((a, b) => b.weight - a.weight)
+          : whiteCapturedPieces
+
+      const newBlackCaptured =
+        capturedPiece && currentPlayer === "black"
+          ? [...blackCapturedPieces, capturedPiece].sort((a, b) => b.weight - a.weight)
+          : blackCapturedPieces
+
+      const newEnPassantTarget: Position | null =
+        piece.type === "pawn" && Math.abs(to.x - from.x) === 2
+          ? {
+              x: from.x + (to.x - from.x) / 2,
+              y: from.y
+            }
+          : null
+
+      // Update castling rights
+      const newCastlingRights = updateCastlingRights(castlingRights, from, piece)
 
       const nextPlayer = currentPlayer === "white" ? "black" : "white"
 
@@ -79,27 +145,30 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
       setValidMoves([])
       setCurrentPlayer(nextPlayer)
       setEnPassantTarget(newEnPassantTarget)
+      setWhiteCapturedPieces(newWhiteCaptured)
+      setBlackCapturedPieces(newBlackCaptured)
+      setCastlingRights(newCastlingRights)
 
-      // Check game status after the move
       const nextPlayerInCheck = isInCheck(newBoard, nextPlayer)
-      const nextPlayerCheckmate = isCheckmate(newBoard, nextPlayer, newEnPassantTarget)
-      const nextPlayerStalemate = isStalemate(newBoard, nextPlayer, newEnPassantTarget)
+      const nextPlayerCheckmate = isCheckmate(newBoard, nextPlayer, newEnPassantTarget, newCastlingRights)
+      const nextPlayerStalemate = isStalemate(newBoard, nextPlayer, newEnPassantTarget, newCastlingRights)
 
-      let newGameStatus: GameStatus = GAME_STATUS.PLAYING
+      const newGameStatus: GameStatus = nextPlayerCheckmate
+        ? GAME_STATUS.CHECKMATE
+        : nextPlayerStalemate
+          ? GAME_STATUS.STALEMATE
+          : nextPlayerInCheck
+            ? GAME_STATUS.CHECK
+            : GAME_STATUS.PLAYING
 
       if (nextPlayerCheckmate) {
-        newGameStatus = GAME_STATUS.CHECKMATE
         setWinner(currentPlayer)
         setShowCelebration(true)
-      } else if (nextPlayerStalemate) {
-        newGameStatus = GAME_STATUS.STALEMATE
-      } else if (nextPlayerInCheck) {
-        newGameStatus = GAME_STATUS.CHECK
       }
 
       setGameStatus(newGameStatus)
     },
-    [board, currentPlayer, enPassantTarget]
+    [board, currentPlayer, enPassantTarget, whiteCapturedPieces, blackCapturedPieces, castlingRights]
   )
 
   const handleSquareClick = useCallback(
@@ -123,7 +192,7 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
         }
 
         if (piece && piece.color === currentPlayer) {
-          const moves = getLegalMoves(piece, position, board, enPassantTarget)
+          const moves = getLegalMoves(piece, position, board, enPassantTarget, castlingRights)
           setSelectedPiecePosition(position)
           setValidMoves(moves)
           return
@@ -133,13 +202,13 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
         setValidMoves([])
       } else {
         if (piece && piece.color === currentPlayer) {
-          const moves = getLegalMoves(piece, position, board, enPassantTarget)
+          const moves = getLegalMoves(piece, position, board, enPassantTarget, castlingRights)
           setSelectedPiecePosition(position)
           setValidMoves(moves)
         }
       }
     },
-    [board, selectedPiecePosition, validMoves, currentPlayer, makeMove, enPassantTarget, gameStatus]
+    [board, selectedPiecePosition, validMoves, currentPlayer, makeMove, enPassantTarget, gameStatus, castlingRights]
   )
 
   const handleDragStart = useCallback(
@@ -151,9 +220,9 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
 
       setDraggedPiece({ piece, from: position })
       setSelectedPiecePosition(position)
-      setValidMoves(getLegalMoves(piece, position, board, enPassantTarget))
+      setValidMoves(getLegalMoves(piece, position, board, enPassantTarget, castlingRights))
     },
-    [currentPlayer, board, enPassantTarget, gameStatus]
+    [currentPlayer, board, enPassantTarget, gameStatus, castlingRights]
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -201,6 +270,14 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
         )}
       </div>
 
+      <div className="chess-board-captivity chess-board-captivity--black">
+        <Captivity
+          capturedPieces={blackCapturedPieces}
+          className="chess-board-captivity-section"
+          scoreDifference={scoreAdvantages.blackAdvantage}
+        />
+      </div>
+
       <div className={`chess-board ${className}`}>
         {board.map((row, rowIndex) =>
           row.map((piece, colIndex) => {
@@ -227,6 +304,14 @@ function ChessBoard({ className = "" }: ChessBoardProps) {
             )
           })
         )}
+      </div>
+
+      <div className="chess-board-captivity chess-board-captivity--white">
+        <Captivity
+          capturedPieces={whiteCapturedPieces}
+          className="chess-board-captivity-section"
+          scoreDifference={scoreAdvantages.whiteAdvantage}
+        />
       </div>
 
       <div className="chess-board-instructions">

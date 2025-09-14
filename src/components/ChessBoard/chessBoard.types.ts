@@ -1,4 +1,3 @@
-// Piece Type constants and type
 export const PIECE_TYPE = {
   PAWN: "pawn",
   ROOK: "rook",
@@ -10,7 +9,6 @@ export const PIECE_TYPE = {
 
 export type PieceType = (typeof PIECE_TYPE)[keyof typeof PIECE_TYPE]
 
-// Piece Color constants and type
 export const PIECE_COLOR = {
   WHITE: "white",
   BLACK: "black"
@@ -18,7 +16,6 @@ export const PIECE_COLOR = {
 
 export type PieceColor = (typeof PIECE_COLOR)[keyof typeof PIECE_COLOR]
 
-// Game Status constants and type
 export const GAME_STATUS = {
   PLAYING: "playing",
   CHECK: "check",
@@ -28,9 +25,19 @@ export const GAME_STATUS = {
 
 export type GameStatus = (typeof GAME_STATUS)[keyof typeof GAME_STATUS]
 
+export const PIECE_WEIGHTS = {
+  [PIECE_TYPE.PAWN]: 1,
+  [PIECE_TYPE.BISHOP]: 3,
+  [PIECE_TYPE.KNIGHT]: 3,
+  [PIECE_TYPE.ROOK]: 5,
+  [PIECE_TYPE.QUEEN]: 9,
+  [PIECE_TYPE.KING]: 0
+} as const
+
 export interface ChessPiece {
   type: PieceType
   color: PieceColor
+  weight: number
 }
 
 export interface Position {
@@ -47,3 +54,30 @@ export interface ChessSquare {
 }
 
 export type ChessBoard = (ChessPiece | null)[][]
+
+export const CASTLING_SIDE = {
+  KINGSIDE: "kingside",
+  QUEENSIDE: "queenside"
+} as const
+
+export type CastlingSide = (typeof CASTLING_SIDE)[keyof typeof CASTLING_SIDE]
+
+export interface CastlingRights {
+  white: {
+    kingside: boolean
+    queenside: boolean
+  }
+  black: {
+    kingside: boolean
+    queenside: boolean
+  }
+}
+
+export interface CastlingMove {
+  type: "castling"
+  side: CastlingSide
+  kingFrom: Position
+  kingTo: Position
+  rookFrom: Position
+  rookTo: Position
+}

@@ -2,8 +2,8 @@ import "./ChessSquare.scss"
 
 import React, { memo, useCallback } from "react"
 
+import type { Position } from "../ChessBoard/chessBoard.types"
 import ChessPiece from "../ChessBoard/ChessPiece"
-import type { Position } from "../ChessBoard/types"
 import type { ChessSquareProps } from "./types"
 
 const CORNER_CLASSES = {

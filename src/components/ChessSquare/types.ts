@@ -1,6 +1,6 @@
 import React from "react"
 
-import type { ChessPiece, Position } from "../ChessBoard/types"
+import type { ChessPiece, Position } from "../ChessBoard/chessBoard.types"
 
 export interface ChessSquareProps {
   piece: ChessPiece | null

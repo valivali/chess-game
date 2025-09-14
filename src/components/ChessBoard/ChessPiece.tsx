@@ -1,6 +1,6 @@
 import { Bishop, King, Knight, Pawn, Queen, Rook } from "../../assets/pieces"
-import type { ChessPiece as ChessPieceType } from "./types"
-import { PIECE_TYPE } from "./types"
+import type { ChessPiece as ChessPieceType } from "./chessBoard.types"
+import { PIECE_TYPE } from "./chessBoard.types"
 
 interface ChessPieceProps {
   piece: ChessPieceType

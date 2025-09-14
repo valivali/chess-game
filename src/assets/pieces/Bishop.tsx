@@ -1,4 +1,4 @@
-import type { PieceColor } from "../../components/ChessBoard/types"
+import type { PieceColor } from "../../components/ChessBoard/chessBoard.types"
 
 interface BishopProps {
   color: PieceColor

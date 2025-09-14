@@ -1,4 +1,4 @@
-import type { ChessBoard, PieceColor, Position } from "../../components/ChessBoard/types"
+import type { ChessBoard, PieceColor, Position } from "../../components/ChessBoard/chessBoard.types"
 
 // Game Status constants and type
 export const GAME_STATUS = {

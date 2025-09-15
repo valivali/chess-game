@@ -4,7 +4,7 @@ export interface CelebrationProps {
 }
 
 export interface ConfettiPiece {
-  id: number
+  id: string
   x: number
   y: number
   rotation: number
@@ -15,7 +15,7 @@ export interface ConfettiPiece {
 }
 
 export interface FireworkParticle {
-  id: number
+  id: string
   x: number
   y: number
   velocityX: number

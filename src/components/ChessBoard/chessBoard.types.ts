@@ -45,6 +45,11 @@ export interface Position {
   y: number
 }
 
+export interface Move {
+  from: Position
+  to: Position
+}
+
 export interface ChessSquare {
   piece: ChessPiece | null
   position: Position

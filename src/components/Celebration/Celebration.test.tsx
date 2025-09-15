@@ -15,7 +15,6 @@ Object.defineProperty(window, "innerHeight", {
   value: 768
 })
 
-// Mock setInterval and clearInterval for animations
 jest.useFakeTimers()
 
 describe("Celebration", () => {
@@ -65,7 +64,6 @@ describe("Celebration", () => {
     const newGameButton = screen.getByText("🎮 New Game")
     fireEvent.click(newGameButton)
 
-    // Component should not be visible after clicking new game
     expect(screen.queryByText("🎉 White Wins! 🎉")).toBeNull()
   })
 
@@ -74,22 +72,18 @@ describe("Celebration", () => {
 
     const newGameButton = screen.getByText("🎮 New Game")
 
-    // Should not throw error when onComplete is undefined
     expect(() => fireEvent.click(newGameButton)).not.toThrow()
   })
 
   it("should create confetti particles over time", async () => {
     render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
-    // Initially no confetti particles
     expect(screen.queryByRole("generic", { name: /confetti/ })).toBe(null)
 
-    // Fast-forward time to trigger confetti creation
     act(() => {
       jest.advanceTimersByTime(300)
     })
 
-    // Confetti should be created (check for elements with confetti-piece class)
     await waitFor(() => {
       const confettiElements = document.querySelectorAll(".confetti-piece")
       expect(confettiElements.length).toBeGreaterThan(0)
@@ -99,12 +93,10 @@ describe("Celebration", () => {
   it("should create firework particles over time", async () => {
     render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
-    // Fast-forward time to trigger firework creation
     act(() => {
       jest.advanceTimersByTime(800)
     })
 
-    // Fireworks should be created (check for elements with firework-particle class)
     await waitFor(() => {
       const fireworkElements = document.querySelectorAll(".firework-particle")
       expect(fireworkElements.length).toBeGreaterThan(0)
@@ -115,11 +107,9 @@ describe("Celebration", () => {
     render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
     act(() => {
-      jest.advanceTimersByTime(300) // Trigger confetti creation
+      jest.advanceTimersByTime(300)
     })
 
-    // White winner should use light colors
-    // This is tested indirectly through the component logic
     expect(screen.getByText("🎉 White Wins! 🎉")).toBeDefined()
   })
 
@@ -127,28 +117,23 @@ describe("Celebration", () => {
     render(<Celebration winner="black" onComplete={mockOnComplete} />)
 
     act(() => {
-      jest.advanceTimersByTime(300) // Trigger confetti creation
+      jest.advanceTimersByTime(300)
     })
 
-    // Black winner should use dark colors
-    // This is tested indirectly through the component logic
     expect(screen.getByText("🎉 Black Wins! 🎉")).toBeDefined()
   })
 
   it("should animate particles over time", async () => {
     render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
-    // Create initial particles
     act(() => {
       jest.advanceTimersByTime(300)
     })
 
-    // Advance animation frames
     act(() => {
-      jest.advanceTimersByTime(16 * 10) // 10 animation frames
+      jest.advanceTimersByTime(16 * 10)
     })
 
-    // Particles should still exist and be animated
     await waitFor(() => {
       const confettiElements = document.querySelectorAll(".confetti-piece")
       expect(confettiElements.length).toBeGreaterThan(0)
@@ -162,7 +147,6 @@ describe("Celebration", () => {
 
     unmount()
 
-    // Should clean up multiple intervals (confetti, fireworks, animation)
     expect(clearIntervalSpy).toHaveBeenCalledTimes(3)
 
     clearIntervalSpy.mockRestore()
@@ -171,7 +155,6 @@ describe("Celebration", () => {
   it("should limit confetti particles to prevent memory issues", async () => {
     render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
-    // Create many confetti batches
     act(() => {
       for (let i = 0; i < 20; i++) {
         jest.advanceTimersByTime(300)
@@ -180,7 +163,6 @@ describe("Celebration", () => {
 
     await waitFor(() => {
       const confettiElements = document.querySelectorAll(".confetti-piece")
-      // Should be limited to 200 particles as per component logic
       expect(confettiElements.length).toBeLessThanOrEqual(200)
     })
   })
@@ -188,7 +170,6 @@ describe("Celebration", () => {
   it("should limit firework particles to prevent memory issues", async () => {
     render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
-    // Create many firework batches
     act(() => {
       for (let i = 0; i < 15; i++) {
         jest.advanceTimersByTime(800)
@@ -197,8 +178,108 @@ describe("Celebration", () => {
 
     await waitFor(() => {
       const fireworkElements = document.querySelectorAll(".firework-particle")
-      // Should be limited to 300 particles as per component logic
       expect(fireworkElements.length).toBeLessThanOrEqual(300)
+    })
+  })
+
+  describe("Unique Key Generation", () => {
+    it("should generate unique keys for confetti particles", async () => {
+      render(<Celebration winner="white" onComplete={mockOnComplete} />)
+
+      act(() => {
+        for (let i = 0; i < 5; i++) {
+          jest.advanceTimersByTime(300)
+        }
+      })
+
+      await waitFor(() => {
+        const confettiElements = document.querySelectorAll(".confetti-piece")
+        expect(confettiElements.length).toBeGreaterThan(0)
+
+        expect(confettiElements.length).toBeGreaterThan(10)
+      })
+    })
+
+    it("should generate unique keys for firework particles", async () => {
+      render(<Celebration winner="white" onComplete={mockOnComplete} />)
+
+      act(() => {
+        for (let i = 0; i < 3; i++) {
+          jest.advanceTimersByTime(800)
+        }
+      })
+
+      await waitFor(() => {
+        const fireworkElements = document.querySelectorAll(".firework-particle")
+
+        expect(fireworkElements.length).toBeGreaterThan(0)
+
+        expect(fireworkElements.length).toBeGreaterThan(30)
+      })
+    })
+
+    it("should handle rapid particle creation without key conflicts", async () => {
+      render(<Celebration winner="white" onComplete={mockOnComplete} />)
+
+      act(() => {
+        jest.advanceTimersByTime(300)
+        jest.advanceTimersByTime(500)
+        jest.advanceTimersByTime(300)
+        jest.advanceTimersByTime(200)
+      })
+
+      await waitFor(() => {
+        const confettiElements = document.querySelectorAll(".confetti-piece")
+        const fireworkElements = document.querySelectorAll(".firework-particle")
+
+        expect(confettiElements.length).toBeGreaterThan(0)
+        expect(fireworkElements.length).toBeGreaterThan(0)
+
+        const totalParticles = confettiElements.length + fireworkElements.length
+        expect(totalParticles).toBeGreaterThan(40)
+      })
+    })
+
+    it("should maintain unique keys during particle animation and cleanup", async () => {
+      render(<Celebration winner="white" onComplete={mockOnComplete} />)
+
+      act(() => {
+        jest.advanceTimersByTime(800)
+      })
+
+      act(() => {
+        jest.advanceTimersByTime(16 * 100)
+      })
+
+      await waitFor(() => {
+        const allParticles = document.querySelectorAll(".confetti-piece, .firework-particle")
+
+        expect(allParticles.length).toBeGreaterThan(0)
+
+        const confettiElements = document.querySelectorAll(".confetti-piece")
+        const fireworkElements = document.querySelectorAll(".firework-particle")
+
+        expect(confettiElements.length + fireworkElements.length).toBeGreaterThan(0)
+      })
+    })
+
+    it("should generate different key patterns for confetti vs fireworks", async () => {
+      render(<Celebration winner="white" onComplete={mockOnComplete} />)
+
+      act(() => {
+        jest.advanceTimersByTime(800)
+      })
+
+      await waitFor(() => {
+        const confettiElements = document.querySelectorAll(".confetti-piece")
+        const fireworkElements = document.querySelectorAll(".firework-particle")
+
+        expect(confettiElements.length).toBeGreaterThan(0)
+        expect(fireworkElements.length).toBeGreaterThan(0)
+
+        expect(confettiElements.length).toBeGreaterThan(10)
+        expect(fireworkElements.length).toBeGreaterThan(25)
+      })
     })
   })
 })

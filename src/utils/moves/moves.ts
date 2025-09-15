@@ -1,38 +1,13 @@
-import type { CastlingRights, CastlingSide, ChessBoard, ChessPiece, PieceType, Position } from "../components/ChessBoard/chessBoard.types"
-import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../components/ChessBoard/chessBoard.types"
-
-export const createInitialBoard = (): ChessBoard => {
-  const board: ChessBoard = Array(8)
-    .fill(null)
-    .map(() => Array(8).fill(null))
-
-  for (let i = 0; i < 8; i++) {
-    board[1][i] = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: PIECE_WEIGHTS[PIECE_TYPE.PAWN] }
-    board[6][i] = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: PIECE_WEIGHTS[PIECE_TYPE.PAWN] }
-  }
-
-  const pieceOrder: PieceType[] = [
-    PIECE_TYPE.ROOK,
-    PIECE_TYPE.KNIGHT,
-    PIECE_TYPE.BISHOP,
-    PIECE_TYPE.QUEEN,
-    PIECE_TYPE.KING,
-    PIECE_TYPE.BISHOP,
-    PIECE_TYPE.KNIGHT,
-    PIECE_TYPE.ROOK
-  ]
-
-  for (let i = 0; i < 8; i++) {
-    board[0][i] = { type: pieceOrder[i], color: PIECE_COLOR.BLACK, weight: PIECE_WEIGHTS[pieceOrder[i]] }
-    board[7][i] = { type: pieceOrder[i], color: PIECE_COLOR.WHITE, weight: PIECE_WEIGHTS[pieceOrder[i]] }
-  }
-
-  return board
-}
-
-export const isValidPosition = (x: number, y: number): boolean => {
-  return x >= 0 && x < 8 && y >= 0 && y < 8
-}
+import type {
+  CastlingRights,
+  CastlingSide,
+  ChessBoard,
+  ChessPiece,
+  PieceColor,
+  Position
+} from "../../components/ChessBoard/chessBoard.types"
+import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/chessBoard.types"
+import { isPositionEqual, isValidPosition } from "../position/position"
 
 const KNIGHT_MOVES = [
   [-2, -1],
@@ -91,24 +66,20 @@ const getSlidingMoves = (
   const moves: Position[] = []
 
   for (const [dx, dy] of directions) {
-    let newX = x + dx
-    let newY = y + dy
+    const getMovesInDirection = (currentX: number, currentY: number): void => {
+      if (!isValidPosition(currentX, currentY)) return
 
-    while (isValidPosition(newX, newY)) {
-      const targetPiece = board[newX][newY]
+      const targetPiece = board[currentX][currentY]
 
       if (!targetPiece) {
-        moves.push({ x: newX, y: newY })
-      } else {
-        if (targetPiece.color !== pieceColor) {
-          moves.push({ x: newX, y: newY })
-        }
-        break
+        moves.push({ x: currentX, y: currentY })
+        getMovesInDirection(currentX + dx, currentY + dy)
+      } else if (targetPiece.color !== pieceColor) {
+        moves.push({ x: currentX, y: currentY })
       }
-
-      newX += dx
-      newY += dy
     }
+
+    getMovesInDirection(x + dx, y + dy)
   }
 
   return moves
@@ -232,10 +203,6 @@ export const getValidMoves = (
   return moveFunction(x, y, piece, board)
 }
 
-export const isPositionEqual = (pos1: Position, pos2: Position): boolean => {
-  return pos1.x === pos2.x && pos1.y === pos2.y
-}
-
 export const isEnPassantCapture = (piece: ChessPiece, from: Position, to: Position, enPassantTarget: Position | null): boolean => {
   if (!enPassantTarget || piece.type !== PIECE_TYPE.PAWN) {
     return false
@@ -251,24 +218,11 @@ export const isEnPassantCapture = (piece: ChessPiece, from: Position, to: Positi
   return deltaX === 1 && deltaY === 1
 }
 
-export const findKingPosition = (board: ChessBoard, color: string): Position | null => {
-  for (let x = 0; x < 8; x++) {
-    for (let y = 0; y < 8; y++) {
-      const piece = board[x][y]
-      if (piece && piece.type === PIECE_TYPE.KING && piece.color === color) {
-        return { x, y }
-      }
-    }
-  }
-  return null
-}
-
 export const isPositionUnderAttack = (board: ChessBoard, position: Position, attackingColor: string): boolean => {
   for (let x = 0; x < 8; x++) {
     for (let y = 0; y < 8; y++) {
       const piece = board[x][y]
       if (piece && piece.color === attackingColor) {
-        // Use basic move generation without en passant or check validation to avoid recursion
         const moves = getValidMoves(piece, { x, y }, board)
         if (moves.some((move) => isPositionEqual(move, position))) {
           return true
@@ -277,15 +231,6 @@ export const isPositionUnderAttack = (board: ChessBoard, position: Position, att
     }
   }
   return false
-}
-
-export const isInCheck = (board: ChessBoard, playerColor: string): boolean => {
-  const kingPosition = findKingPosition(board, playerColor)
-  if (!kingPosition) return false
-
-  const opponentColor = playerColor === PIECE_COLOR.WHITE ? PIECE_COLOR.BLACK : PIECE_COLOR.WHITE
-
-  return isPositionUnderAttack(board, kingPosition, opponentColor)
 }
 
 export const wouldLeaveKingInCheck = (
@@ -300,25 +245,21 @@ export const wouldLeaveKingInCheck = (
 
   if (!piece) return false
 
-  // Handle castling move
   if (isCastlingMove(from, to, piece)) {
     const side = getCastlingSide(from, to)
     const kingRow = piece.color === PIECE_COLOR.WHITE ? 7 : 0
     const rookFromCol = side === CASTLING_SIDE.KINGSIDE ? 7 : 0
     const rookToCol = side === CASTLING_SIDE.KINGSIDE ? 5 : 3
 
-    // Move king
     testBoard[to.x][to.y] = piece
     testBoard[from.x][from.y] = null
 
-    // Move rook
     const rook = testBoard[kingRow][rookFromCol]
     if (rook) {
       testBoard[kingRow][rookToCol] = rook
       testBoard[kingRow][rookFromCol] = null
     }
   } else {
-    // Handle en passant capture
     if (enPassantTarget && isEnPassantCapture(piece, from, to, enPassantTarget)) {
       testBoard[from.x][to.y] = null
     }
@@ -406,7 +347,6 @@ export const updateCastlingRights = (castlingRights: CastlingRights, from: Posit
     black: { ...castlingRights.black }
   }
 
-  // If king moves, lose all castling rights for that color
   if (piece.type === PIECE_TYPE.KING) {
     if (piece.color === PIECE_COLOR.WHITE) {
       newRights.white.kingside = false
@@ -417,7 +357,6 @@ export const updateCastlingRights = (castlingRights: CastlingRights, from: Posit
     }
   }
 
-  // If rook moves from starting position, lose castling rights for that side
   if (piece.type === PIECE_TYPE.ROOK) {
     if (piece.color === PIECE_COLOR.WHITE) {
       if (from.x === 7 && from.y === 0) {
@@ -442,33 +381,27 @@ export const canCastle = (board: ChessBoard, playerColor: string, side: Castling
   const kingRow = isWhite ? 7 : 0
   const kingCol = 4
 
-  // Check if we have castling rights for this side
   const rights = isWhite ? castlingRights.white : castlingRights.black
   if (!rights[side]) {
     return false
   }
 
-  // Check if king is in starting position
   const king = board[kingRow][kingCol]
   if (!king || king.type !== PIECE_TYPE.KING || king.color !== playerColor) {
     return false
   }
 
-  // Check if king is currently in check
   if (isInCheck(board, playerColor)) {
     return false
   }
 
-  // Define positions based on castling side
   const rookCol = side === CASTLING_SIDE.KINGSIDE ? 7 : 0
 
-  // Check if rook is in starting position
   const rook = board[kingRow][rookCol]
   if (!rook || rook.type !== PIECE_TYPE.ROOK || rook.color !== playerColor) {
     return false
   }
 
-  // Check if path is clear between king and rook
   const startCol = Math.min(kingCol, rookCol)
   const endCol = Math.max(kingCol, rookCol)
   for (let col = startCol + 1; col < endCol; col++) {
@@ -477,7 +410,6 @@ export const canCastle = (board: ChessBoard, playerColor: string, side: Castling
     }
   }
 
-  // Check if king would pass through or land on a square under attack
   const opponentColor = isWhite ? PIECE_COLOR.BLACK : PIECE_COLOR.WHITE
   const colsToCheck = side === CASTLING_SIDE.KINGSIDE ? [5, 6] : [2, 3]
 
@@ -516,4 +448,43 @@ export const isCastlingMove = (from: Position, to: Position, piece: ChessPiece):
 
 export const getCastlingSide = (from: Position, to: Position): CastlingSide => {
   return to.y > from.y ? CASTLING_SIDE.KINGSIDE : CASTLING_SIDE.QUEENSIDE
+}
+
+export const findKingPosition = (board: ChessBoard, color: string): Position | null => {
+  for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 8; y++) {
+      const piece = board[x][y]
+      if (piece && piece.type === PIECE_TYPE.KING && piece.color === color) {
+        return { x, y }
+      }
+    }
+  }
+  return null
+}
+
+export const isInCheck = (board: ChessBoard, playerColor: string): boolean => {
+  const kingPosition = findKingPosition(board, playerColor)
+  if (!kingPosition) return false
+
+  const opponentColor = playerColor === PIECE_COLOR.WHITE ? PIECE_COLOR.BLACK : PIECE_COLOR.WHITE
+
+  return isPositionUnderAttack(board, kingPosition, opponentColor)
+}
+
+export const isPawnPromotion = (piece: ChessPiece, to: Position): boolean => {
+  if (piece.type !== PIECE_TYPE.PAWN) {
+    return false
+  }
+
+  const promotionRow = piece.color === PIECE_COLOR.WHITE ? 0 : 7
+
+  return to.x === promotionRow
+}
+
+export const createPromotedQueen = (pawnColor: string): ChessPiece => {
+  return {
+    type: PIECE_TYPE.QUEEN,
+    color: pawnColor as PieceColor,
+    weight: PIECE_WEIGHTS[PIECE_TYPE.QUEEN]
+  }
 }

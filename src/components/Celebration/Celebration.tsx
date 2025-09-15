@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from "react"
 
 import type { CelebrationProps, ConfettiPiece, FireworkParticle } from "./types"
 
+// Unique ID generator
+const createUniqueId = (() => {
+  let counter = 0
+  return (prefix: string = "") => `${prefix}${Date.now()}-${++counter}-${Math.random().toString(36).substr(2, 9)}`
+})()
+
 const Celebration = ({ winner, onComplete }: CelebrationProps) => {
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
   const [fireworks, setFireworks] = useState<FireworkParticle[]>([])
@@ -30,7 +36,7 @@ const Celebration = ({ winner, onComplete }: CelebrationProps) => {
       const newConfetti: ConfettiPiece[] = []
       for (let i = 0; i < 15; i++) {
         newConfetti.push({
-          id: Date.now() + Math.random(),
+          id: createUniqueId("confetti-"),
           x: Math.random() * window.innerWidth,
           y: -10,
           rotation: Math.random() * 360,
@@ -63,7 +69,7 @@ const Celebration = ({ winner, onComplete }: CelebrationProps) => {
         const angle = (i / 30) * Math.PI * 2
         const velocity = Math.random() * 4 + 2
         particles.push({
-          id: Date.now() + i + Math.random(),
+          id: createUniqueId("firework-"),
           x: centerX,
           y: centerY,
           velocityX: Math.cos(angle) * velocity,

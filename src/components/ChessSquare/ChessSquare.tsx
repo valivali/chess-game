@@ -32,13 +32,17 @@ const buildClassName = (
   isHighlighted: boolean,
   cornerClass: string | null
 ): string => {
-  let className = BASE_CLASSES
-  className += isLight ? ` ${LIGHT_CLASS}` : ` ${DARK_CLASS}`
-  if (isSelected) className += ` ${SELECTED_CLASS}`
-  if (isValidMove) className += ` ${VALID_MOVE_CLASS}`
-  if (isHighlighted) className += ` ${HIGHLIGHTED_CLASS}`
-  if (cornerClass) className += ` ${cornerClass}`
-  return className
+  const baseClasses = `${BASE_CLASSES}${isLight ? ` ${LIGHT_CLASS}` : ` ${DARK_CLASS}`}`
+  const conditionalClasses = [
+    isSelected && SELECTED_CLASS,
+    isValidMove && VALID_MOVE_CLASS,
+    isHighlighted && HIGHLIGHTED_CLASS,
+    cornerClass
+  ]
+    .filter(Boolean)
+    .join(" ")
+
+  return conditionalClasses ? `${baseClasses} ${conditionalClasses}` : baseClasses
 }
 
 const ChessSquare = memo(

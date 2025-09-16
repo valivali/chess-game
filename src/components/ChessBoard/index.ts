@@ -1,3 +1,3 @@
 export { default as ChessBoard } from "./ChessBoard"
 export { default as ChessPiece } from "./ChessPiece"
-export * from "./chessBoard.types"
+export * from "./ChessBoard.types.ts"

@@ -14,7 +14,7 @@ import { getSquareKey, indicesToPosition, isLightSquare, isPositionEqual } from 
 import Captivity from "../Captivity"
 import Celebration from "../Celebration"
 import ChessSquare from "../ChessSquare"
-import { GAME_STATUS } from "./chessBoard.types"
+import { GAME_STATUS } from "./ChessBoard.types.ts"
 
 interface ChessBoardProps {
   className?: string

@@ -50,14 +50,6 @@ export interface Move {
   to: Position
 }
 
-export interface ChessSquare {
-  piece: ChessPiece | null
-  position: Position
-  isSelected: boolean
-  isValidMove: boolean
-  isHighlighted: boolean
-}
-
 export type ChessBoard = (ChessPiece | null)[][]
 
 export const CASTLING_SIDE = {
@@ -76,13 +68,4 @@ export interface CastlingRights {
     kingside: boolean
     queenside: boolean
   }
-}
-
-export interface CastlingMove {
-  type: "castling"
-  side: CastlingSide
-  kingFrom: Position
-  kingTo: Position
-  rookFrom: Position
-  rookTo: Position
 }

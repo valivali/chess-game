@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "@jest/globals"
 
-import type { CastlingRights, ChessBoard, ChessPiece, Position } from "../../components/ChessBoard/chessBoard.types"
-import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/chessBoard.types"
+import type { CastlingRights, ChessBoard, ChessPiece, Position } from "../../components/ChessBoard/ChessBoard.types.ts"
+import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types.ts"
 import { createInitialBoard } from "../board/board"
 import {
   canCastle,

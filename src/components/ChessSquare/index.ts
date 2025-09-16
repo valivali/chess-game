@@ -1,2 +1,2 @@
 export { default } from "./ChessSquare"
-export type { ChessSquareProps } from "./types"
+export type { ChessSquareProps, ChessSquare } from "./ChessSquare.types.ts"

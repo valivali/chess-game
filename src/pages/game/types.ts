@@ -1,4 +1,4 @@
-import type { ChessBoard, PieceColor, Position } from "../../components/ChessBoard/chessBoard.types"
+import type { ChessBoard, PieceColor, Position } from "../../components/ChessBoard/ChessBoard.types.ts"
 
 export const GAME_STATUS = {
   ACTIVE: "active",

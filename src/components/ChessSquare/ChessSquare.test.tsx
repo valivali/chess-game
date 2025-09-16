@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-import type { ChessPiece, Position } from "../ChessBoard/chessBoard.types"
-import { PIECE_COLOR, PIECE_TYPE } from "../ChessBoard/chessBoard.types"
+import type { ChessPiece, Position } from "../ChessBoard/ChessBoard.types.ts"
+import { PIECE_COLOR, PIECE_TYPE } from "../ChessBoard/ChessBoard.types.ts"
 import ChessSquare from "./ChessSquare"
 
 // Mock the ChessPiece component

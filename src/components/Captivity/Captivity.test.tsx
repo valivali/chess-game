@@ -1,8 +1,8 @@
 import { describe, expect, it } from "@jest/globals"
 import { render, screen } from "@testing-library/react"
 
-import type { ChessPiece } from "../ChessBoard/chessBoard.types"
-import { PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../ChessBoard/chessBoard.types"
+import type { ChessPiece } from "../ChessBoard/ChessBoard.types.ts"
+import { PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../ChessBoard/ChessBoard.types.ts"
 import Captivity from "./Captivity"
 
 describe("Captivity", () => {

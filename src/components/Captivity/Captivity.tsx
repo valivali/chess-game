@@ -1,6 +1,6 @@
 import "./Captivity.scss"
 
-import type { ChessPiece } from "../ChessBoard/chessBoard.types"
+import type { ChessPiece } from "../ChessBoard/ChessBoard.types.ts"
 import ChessPieceComponent from "../ChessBoard/ChessPiece"
 
 export interface CaptivityProps {

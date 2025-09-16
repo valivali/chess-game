@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react"
 import { match } from "ts-pattern"
 
+import { CASTLING_SIDE, GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../components/ChessBoard"
 import type {
   CastlingRights,
   ChessBoard as ChessBoardType,
@@ -9,8 +10,7 @@ import type {
   Move,
   PieceColor,
   Position
-} from "../components/ChessBoard/chessBoard.types"
-import { CASTLING_SIDE, GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../components/ChessBoard/chessBoard.types"
+} from "../components/ChessBoard/ChessBoard.types.ts"
 import { createInitialBoard } from "../utils/board"
 import {
   createInitialCastlingRights,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals"
 
-import type { ChessBoard } from "../../components/ChessBoard/chessBoard.types"
-import { PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/chessBoard.types"
+import type { ChessBoard } from "../../components/ChessBoard/ChessBoard.types.ts"
+import { PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types.ts"
 import { findKingPosition } from "../moves/moves"
 import { createInitialBoard } from "./board"
 

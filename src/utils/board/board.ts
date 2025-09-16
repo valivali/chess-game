@@ -1,5 +1,5 @@
-import type { ChessBoard, PieceType } from "../../components/ChessBoard/chessBoard.types"
-import { PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/chessBoard.types"
+import type { ChessBoard, PieceType } from "../../components/ChessBoard/ChessBoard.types.ts"
+import { PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types.ts"
 
 export const createInitialBoard = (): ChessBoard => {
   const board: ChessBoard = Array(8)

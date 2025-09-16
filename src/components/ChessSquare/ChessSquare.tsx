@@ -2,9 +2,9 @@ import "./ChessSquare.scss"
 
 import React, { memo, useCallback } from "react"
 
-import type { Position } from "../ChessBoard/chessBoard.types"
+import type { Position } from "../ChessBoard/ChessBoard.types.ts"
 import ChessPiece from "../ChessBoard/ChessPiece"
-import type { ChessSquareProps } from "./types"
+import type { ChessSquareProps } from "./ChessSquare.types.ts"
 
 const CORNER_CLASSES = {
   "0-0": "chess-square--top-left",

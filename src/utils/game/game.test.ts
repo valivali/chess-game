@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals"
 
-import type { ChessPiece } from "../../components/ChessBoard/chessBoard.types"
-import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/chessBoard.types"
+import type { ChessPiece } from "../../components/ChessBoard/ChessBoard.types.ts"
+import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types.ts"
 import {
   calculateScoreAdvantages,
   getCurrentPlayerDisplayText,

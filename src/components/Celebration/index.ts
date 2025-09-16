@@ -1,2 +1,2 @@
 export { default } from "./Celebration"
-export type { CelebrationProps } from "./types"
+export type { CelebrationProps } from "./Celebration.types.ts"

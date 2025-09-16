@@ -1,5 +1,5 @@
-import type { ChessPiece, GameStatus, PieceColor } from "../../components/ChessBoard/chessBoard.types"
-import { GAME_STATUS, PIECE_COLOR } from "../../components/ChessBoard/chessBoard.types"
+import type { ChessPiece, GameStatus, PieceColor } from "../../components/ChessBoard/ChessBoard.types.ts"
+import { GAME_STATUS, PIECE_COLOR } from "../../components/ChessBoard/ChessBoard.types.ts"
 
 export interface ScoreAdvantages {
   whiteAdvantage?: number

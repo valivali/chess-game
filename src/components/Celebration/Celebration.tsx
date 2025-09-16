@@ -2,7 +2,7 @@ import "./Celebration.scss"
 
 import { useEffect, useMemo, useState } from "react"
 
-import type { CelebrationProps, ConfettiPiece, FireworkParticle } from "./types"
+import type { CelebrationProps, ConfettiPiece, FireworkParticle } from "./Celebration.types.ts"
 
 // Unique ID generator
 const createUniqueId = (() => {

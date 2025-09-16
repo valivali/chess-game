@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals"
 
-import type { Position } from "../../components/ChessBoard/chessBoard.types"
+import type { Position } from "../../components/ChessBoard/ChessBoard.types.ts"
 import { createPosition, getSquareKey, indicesToPosition, isLightSquare, isPositionEqual, isValidPosition } from "./position"
 
 describe("Position Utilities", () => {

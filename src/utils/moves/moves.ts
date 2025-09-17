@@ -5,8 +5,8 @@ import type {
   ChessPiece,
   PieceColor,
   Position
-} from "../../components/ChessBoard/ChessBoard.types.ts"
-import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types.ts"
+} from "../../components/ChessBoard/ChessBoard.types"
+import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types"
 import { isPositionEqual, isValidPosition } from "../position/position"
 
 const KNIGHT_MOVES = [

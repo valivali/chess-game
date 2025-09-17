@@ -1,0 +1,12 @@
+# Global coding principles
+- Always follow the SOLID principles:
+  - Single Responsibility: Each class/module must have only one responsibility.
+  - Open/Closed: Code should be open for extension but closed for modification.
+  - Liskov Substitution: Subtypes must be substitutable for their base types.
+  - Interface Segregation: Prefer small, specific interfaces over large, general ones.
+  - Dependency Inversion: Depend on abstractions, not concrete implementations.
+
+# Code style
+- Use meaningful, descriptive names for functions and variables.
+- Add comments only when code intent is not self-explanatory.
+- Write unit tests when creating new classes or functions.

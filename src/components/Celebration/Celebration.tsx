@@ -1,18 +1,12 @@
 import "./Celebration.scss"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
-import type { CelebrationProps, ConfettiPiece, FireworkParticle } from "./Celebration.types.ts"
-
-// Unique ID generator
-const createUniqueId = (() => {
-  let counter = 0
-  return (prefix: string = "") => `${prefix}${Date.now()}-${++counter}-${Math.random().toString(36).substr(2, 9)}`
-})()
+import { useConfettiAnimation } from "../../hooks/useConfettiAnimation/useConfettiAnimation"
+import { useFireworkAnimation } from "../../hooks/useFireworkAnimation/useFireworkAnimation"
+import type { CelebrationProps } from "./Celebration.types.ts"
 
 const Celebration = ({ winner, onComplete }: CelebrationProps) => {
-  const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
-  const [fireworks, setFireworks] = useState<FireworkParticle[]>([])
   const [showCelebration, setShowCelebration] = useState(true)
 
   const confettiColors = useMemo(
@@ -31,98 +25,19 @@ const Celebration = ({ winner, onComplete }: CelebrationProps) => {
     [winner]
   )
 
-  useEffect(() => {
-    const createConfetti = () => {
-      const newConfetti: ConfettiPiece[] = []
-      for (let i = 0; i < 15; i++) {
-        newConfetti.push({
-          id: createUniqueId("confetti-"),
-          x: Math.random() * window.innerWidth,
-          y: -10,
-          rotation: Math.random() * 360,
-          color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
-          size: Math.random() * 8 + 4,
-          velocityX: (Math.random() - 0.5) * 4,
-          velocityY: Math.random() * 3 + 2
-        })
-      }
-      setConfetti((prev) => {
-        const updated = [...prev, ...newConfetti]
-        return updated.length > 200 ? updated.slice(-200) : updated
-      })
-    }
+  const confetti = useConfettiAnimation({
+    colors: confettiColors,
+    isActive: showCelebration,
+    maxParticles: 200,
+    creationRate: 300
+  })
 
-    createConfetti()
-
-    const confettiInterval = setInterval(createConfetti, 300)
-
-    return () => clearInterval(confettiInterval)
-  }, [confettiColors])
-
-  useEffect(() => {
-    const createFirework = () => {
-      const centerX = window.innerWidth / 2 + (Math.random() - 0.5) * 400
-      const centerY = window.innerHeight / 2 + (Math.random() - 0.5) * 200
-      const particles: FireworkParticle[] = []
-
-      for (let i = 0; i < 30; i++) {
-        const angle = (i / 30) * Math.PI * 2
-        const velocity = Math.random() * 4 + 2
-        particles.push({
-          id: createUniqueId("firework-"),
-          x: centerX,
-          y: centerY,
-          velocityX: Math.cos(angle) * velocity,
-          velocityY: Math.sin(angle) * velocity,
-          color: fireworkColors[Math.floor(Math.random() * fireworkColors.length)],
-          life: 60,
-          maxLife: 60
-        })
-      }
-
-      setFireworks((prev) => {
-        const updated = [...prev, ...particles]
-        // Keep only the most recent 300 firework particles to prevent infinite accumulation
-        return updated.length > 300 ? updated.slice(-300) : updated
-      })
-    }
-
-    const fireworkInterval = setInterval(createFirework, 800)
-
-    return () => clearInterval(fireworkInterval)
-  }, [fireworkColors])
-
-  useEffect(() => {
-    const animate = () => {
-      setConfetti((prev) =>
-        prev
-          .map((piece) => ({
-            ...piece,
-            x: piece.x + piece.velocityX,
-            y: piece.y + piece.velocityY,
-            rotation: piece.rotation + 2,
-            velocityY: piece.velocityY + 0.1 // gravity
-          }))
-          .filter((piece) => piece.y < window.innerHeight + 50)
-      )
-
-      setFireworks((prev) =>
-        prev
-          .map((particle) => ({
-            ...particle,
-            x: particle.x + particle.velocityX,
-            y: particle.y + particle.velocityY,
-            life: particle.life - 1,
-            velocityY: particle.velocityY + 0.05
-          }))
-          .filter((particle) => particle.life > 0)
-      )
-    }
-
-    const animationFrame = setInterval(animate, 16) // ~60fps
-
-    return () => clearInterval(animationFrame)
-  }, [])
+  const fireworks = useFireworkAnimation({
+    colors: fireworkColors,
+    isActive: showCelebration,
+    maxParticles: 300,
+    creationRate: 800
+  })
 
   const handleNewGame = () => {
     setShowCelebration(false)

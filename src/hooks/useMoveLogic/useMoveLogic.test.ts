@@ -1,24 +1,12 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { renderHook } from "@testing-library/react"
 
-import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard"
-import type { ChessBoard, ChessPiece, Position } from "../../components/ChessBoard/ChessBoard.types"
+import { PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard"
+import type { ChessBoard, Position } from "../../components/ChessBoard/ChessBoard.types"
+import type { IChessPiece } from "../../components/pieces"
+import { PieceFactory } from "../../components/pieces"
 import { createInitialBoard } from "../../utils/board"
-import * as movesUtils from "../../utils/moves"
 import { useMoveLogic } from "./useMoveLogic"
-
-jest.mock("../../utils/moves", () => {
-  const actual = jest.requireActual("../../utils/moves")
-  return Object.assign({}, actual, {
-    isCastlingMove: jest.fn(),
-    getCastlingSide: jest.fn(),
-    isEnPassantCapture: jest.fn(),
-    isPawnPromotion: jest.fn(),
-    createPromotedQueen: jest.fn()
-  })
-})
-
-const mockMovesUtils = movesUtils as jest.Mocked<typeof movesUtils>
 
 describe("useMoveLogic", () => {
   let mockBoard: ChessBoard
@@ -57,19 +45,10 @@ describe("useMoveLogic", () => {
   })
 
   describe("executePieceMove - King moves", () => {
-    const mockKing: ChessPiece = {
-      type: PIECE_TYPE.KING,
-      color: PIECE_COLOR.WHITE,
-      weight: 0
-    }
+    const mockKing: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
 
     it("should handle regular king move", () => {
-      mockMovesUtils.isCastlingMove.mockReturnValue(false)
-      const targetPiece: ChessPiece = {
-        type: PIECE_TYPE.PAWN,
-        color: PIECE_COLOR.BLACK,
-        weight: 1
-      }
+      const targetPiece: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
 
       mockBoard[mockToPosition.x][mockToPosition.y] = targetPiece
       mockBoard[mockFromPosition.x][mockFromPosition.y] = mockKing
@@ -86,14 +65,7 @@ describe("useMoveLogic", () => {
     })
 
     it("should handle castling move", () => {
-      mockMovesUtils.isCastlingMove.mockReturnValue(true)
-      mockMovesUtils.getCastlingSide.mockReturnValue(CASTLING_SIDE.KINGSIDE)
-
-      const mockRook: ChessPiece = {
-        type: PIECE_TYPE.ROOK,
-        color: PIECE_COLOR.WHITE,
-        weight: 5
-      }
+      const mockRook: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
 
       const kingFromPos: Position = { x: 7, y: 4 }
       const kingToPos: Position = { x: 7, y: 6 }
@@ -114,14 +86,7 @@ describe("useMoveLogic", () => {
     })
 
     it("should handle queenside castling", () => {
-      mockMovesUtils.isCastlingMove.mockReturnValue(true)
-      mockMovesUtils.getCastlingSide.mockReturnValue(CASTLING_SIDE.QUEENSIDE)
-
-      const mockRook: ChessPiece = {
-        type: PIECE_TYPE.ROOK,
-        color: PIECE_COLOR.WHITE,
-        weight: 5
-      }
+      const mockRook: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
 
       const kingFromPos: Position = { x: 7, y: 4 }
       const kingToPos: Position = { x: 7, y: 2 }
@@ -141,27 +106,10 @@ describe("useMoveLogic", () => {
   })
 
   describe("executePieceMove - Pawn moves", () => {
-    const mockPawn: ChessPiece = {
-      type: PIECE_TYPE.PAWN,
-      color: PIECE_COLOR.WHITE,
-      weight: 1
-    }
-
-    const mockQueen: ChessPiece = {
-      type: PIECE_TYPE.QUEEN,
-      color: PIECE_COLOR.WHITE,
-      weight: 9
-    }
+    const mockPawn: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
 
     it("should handle regular pawn move", () => {
-      mockMovesUtils.isEnPassantCapture.mockReturnValue(false)
-      mockMovesUtils.isPawnPromotion.mockReturnValue(false)
-
-      const targetPiece: ChessPiece = {
-        type: PIECE_TYPE.PAWN,
-        color: PIECE_COLOR.BLACK,
-        weight: 1
-      }
+      const targetPiece: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
 
       mockBoard[mockToPosition.x][mockToPosition.y] = targetPiece
       mockBoard[mockFromPosition.x][mockFromPosition.y] = mockPawn
@@ -177,57 +125,47 @@ describe("useMoveLogic", () => {
     })
 
     it("should handle en passant capture", () => {
-      mockMovesUtils.isEnPassantCapture.mockReturnValue(true)
-      mockMovesUtils.isPawnPromotion.mockReturnValue(false)
-
-      const enPassantTarget: Position = { x: 3, y: 4 }
-      const capturedPawn: ChessPiece = {
-        type: PIECE_TYPE.PAWN,
-        color: PIECE_COLOR.BLACK,
-        weight: 1
-      }
+      const whitePawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
+      const blackPawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
 
       const pawnFromPos: Position = { x: 3, y: 3 }
       const pawnToPos: Position = { x: 2, y: 4 }
+      const enPassantTarget: Position = { x: 2, y: 4 }
 
-      mockBoard[pawnFromPos.x][pawnFromPos.y] = mockPawn
-      mockBoard[pawnFromPos.x][pawnToPos.y] = capturedPawn
+      mockBoard[pawnFromPos.x][pawnFromPos.y] = whitePawn
+      mockBoard[pawnFromPos.x][pawnToPos.y] = blackPawn
 
       const { result } = renderHook(() => useMoveLogic())
       const { executePieceMove } = result.current
 
-      const moveResult = executePieceMove(mockPawn, pawnFromPos, pawnToPos, mockBoard, enPassantTarget)
+      const moveResult = executePieceMove(whitePawn, pawnFromPos, pawnToPos, mockBoard, enPassantTarget)
 
-      expect(moveResult.capturedPiece).toBe(capturedPawn)
-      expect(mockBoard[pawnToPos.x][pawnToPos.y]).toBe(mockPawn)
+      expect(moveResult.capturedPiece).toBe(blackPawn)
+      expect(mockBoard[pawnToPos.x][pawnToPos.y]).toBe(whitePawn)
       expect(mockBoard[pawnFromPos.x][pawnFromPos.y]).toBeNull()
       expect(mockBoard[pawnFromPos.x][pawnToPos.y]).toBeNull()
     })
 
     it("should handle pawn promotion", () => {
-      mockMovesUtils.isEnPassantCapture.mockReturnValue(false)
-      mockMovesUtils.isPawnPromotion.mockReturnValue(true)
-      mockMovesUtils.createPromotedQueen.mockReturnValue(mockQueen)
+      const whitePawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
 
       const promotionFromPos: Position = { x: 1, y: 3 }
       const promotionToPos: Position = { x: 0, y: 3 }
 
-      mockBoard[promotionFromPos.x][promotionFromPos.y] = mockPawn
+      mockBoard[promotionFromPos.x][promotionFromPos.y] = whitePawn
 
       const { result } = renderHook(() => useMoveLogic())
       const { executePieceMove } = result.current
 
-      executePieceMove(mockPawn, promotionFromPos, promotionToPos, mockBoard, null)
+      executePieceMove(whitePawn, promotionFromPos, promotionToPos, mockBoard, null)
 
-      expect(mockBoard[promotionToPos.x][promotionToPos.y]).toBe(mockQueen)
+      const promotedPiece = mockBoard[promotionToPos.x][promotionToPos.y]
+      expect(promotedPiece?.type).toBe(PIECE_TYPE.QUEEN)
+      expect(promotedPiece?.color).toBe(PIECE_COLOR.WHITE)
       expect(mockBoard[promotionFromPos.x][promotionFromPos.y]).toBeNull()
-      expect(mockMovesUtils.createPromotedQueen).toHaveBeenCalledWith(PIECE_COLOR.WHITE)
     })
 
     it("should set en passant target for double pawn move", () => {
-      mockMovesUtils.isEnPassantCapture.mockReturnValue(false)
-      mockMovesUtils.isPawnPromotion.mockReturnValue(false)
-
       const doubleMoveFrom: Position = { x: 6, y: 3 }
       const doubleMoveTo: Position = { x: 4, y: 3 }
 
@@ -242,9 +180,6 @@ describe("useMoveLogic", () => {
     })
 
     it("should not set en passant target for single pawn move", () => {
-      mockMovesUtils.isEnPassantCapture.mockReturnValue(false)
-      mockMovesUtils.isPawnPromotion.mockReturnValue(false)
-
       const singleMoveFrom: Position = { x: 5, y: 3 }
       const singleMoveTo: Position = { x: 4, y: 3 }
 
@@ -269,17 +204,9 @@ describe("useMoveLogic", () => {
 
     testPieces.forEach(({ type }) => {
       it(`should handle ${type} move`, () => {
-        const piece: ChessPiece = {
-          type,
-          color: PIECE_COLOR.WHITE,
-          weight: 5
-        }
+        const piece: IChessPiece = PieceFactory.createPiece(type, PIECE_COLOR.WHITE)
 
-        const targetPiece: ChessPiece = {
-          type: PIECE_TYPE.PAWN,
-          color: PIECE_COLOR.BLACK,
-          weight: 1
-        }
+        const targetPiece: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
 
         mockBoard[mockToPosition.x][mockToPosition.y] = targetPiece
         mockBoard[mockFromPosition.x][mockFromPosition.y] = piece

@@ -3,7 +3,9 @@ import { act, renderHook } from "@testing-library/react"
 import React from "react"
 
 import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard"
-import type { CastlingRights, ChessBoard, ChessPiece, GameStatus, PieceColor, Position } from "../../components/ChessBoard/ChessBoard.types"
+import type { CastlingRights, ChessBoard, GameStatus, PieceColor, Position } from "../../components/ChessBoard/ChessBoard.types"
+import { PieceFactory } from "../../components/pieces/PieceFactory"
+import type { IChessPiece } from "../../components/pieces/pieces.types"
 import { createInitialBoard } from "../../utils/board"
 import { createInitialCastlingRights } from "../../utils/moves"
 import * as movesUtils from "../../utils/moves"
@@ -38,17 +40,8 @@ describe("usePieceInteraction", () => {
   const mockPosition2: Position = { x: 1, y: 1 }
   const mockPosition3: Position = { x: 2, y: 2 }
 
-  const mockWhitePawn: ChessPiece = {
-    type: PIECE_TYPE.PAWN,
-    color: PIECE_COLOR.WHITE,
-    weight: 1
-  }
-
-  const mockBlackPawn: ChessPiece = {
-    type: PIECE_TYPE.PAWN,
-    color: PIECE_COLOR.BLACK,
-    weight: 1
-  }
+  const mockWhitePawn: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
+  const mockBlackPawn: IChessPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
 
   const defaultProps = {
     board: createInitialBoard(),
@@ -185,7 +178,7 @@ describe("usePieceInteraction", () => {
       expect(state.validMoves).toEqual(mockMoves)
     })
 
-    it.skip("should make move when clicking on valid move position", () => {
+    it("should make move when clicking on valid move position", () => {
       const mockMoves = [mockPosition2]
       mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
       mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
@@ -212,9 +205,10 @@ describe("usePieceInteraction", () => {
       expect(mockOnMoveAttempt).toHaveBeenCalledWith(mockPosition1, mockPosition2)
     })
 
-    it.skip("should deselect piece when clicking on same selected piece", () => {
+    it("should deselect piece when clicking on same selected piece", () => {
       const mockMoves = [mockPosition2]
       mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
+      mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
       mockBoard[mockPosition1.x][mockPosition1.y] = mockWhitePawn
 
       const { result } = renderHook(() =>
@@ -223,16 +217,15 @@ describe("usePieceInteraction", () => {
           board: mockBoard
         })
       )
-      const [, actions] = result.current
 
       act(() => {
+        const [, actions] = result.current
         actions.selectPiece(mockPosition1, mockWhitePawn)
       })
 
-      mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
-
       act(() => {
-        actions.handleSquareClick(mockPosition1)
+        const [, currentActions] = result.current
+        currentActions.handleSquareClick(mockPosition1)
       })
 
       const [state] = result.current
@@ -269,7 +262,7 @@ describe("usePieceInteraction", () => {
       expect(state.validMoves).toEqual(mockMoves2)
     })
 
-    it.skip("should clear selection when clicking on empty square (invalid move)", () => {
+    it("should clear selection when clicking on empty square (invalid move)", () => {
       const mockMoves = [mockPosition2]
       mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
       mockBoard[mockPosition1.x][mockPosition1.y] = mockWhitePawn
@@ -397,24 +390,27 @@ describe("usePieceInteraction", () => {
       expect(mockDragEvent.preventDefault).toHaveBeenCalled()
     })
 
-    it.skip("should handle drop on valid position", () => {
+    it("should handle drop on valid position", () => {
+      // Set up mocks for valid move
+      const mockMoves = [mockPosition2]
+      mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
+      mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
+
       const { result } = renderHook(() =>
         usePieceInteraction({
           ...defaultProps,
           onMoveAttempt: mockOnMoveAttempt
         })
       )
-      const [, actions] = result.current
 
       act(() => {
+        const [, actions] = result.current
         actions.handleDragStart(mockDragEvent, mockWhitePawn, mockPosition1)
       })
 
-      const [, currentActions] = result.current
-      jest.spyOn(currentActions, "isValidMove").mockReturnValue(true)
-
       act(() => {
-        actions.handleDrop(mockDragEvent, mockPosition2)
+        const [, currentActions] = result.current
+        currentActions.handleDrop(mockDragEvent, mockPosition2)
       })
 
       expect(mockDragEvent.preventDefault).toHaveBeenCalled()
@@ -424,28 +420,33 @@ describe("usePieceInteraction", () => {
       expect(state.draggedPiece).toBeNull()
     })
 
-    it.skip("should handle drop on invalid position without making move", () => {
+    it("should handle drop on invalid position without making move", () => {
+      // Set up mocks for invalid move (no valid moves)
+      mockMovesUtils.getLegalMoves.mockReturnValue([])
+      mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
+
       const { result } = renderHook(() =>
         usePieceInteraction({
           ...defaultProps,
           onMoveAttempt: mockOnMoveAttempt
         })
       )
-      const [, actions] = result.current
 
       act(() => {
+        const [, actions] = result.current
         actions.handleDragStart(mockDragEvent, mockWhitePawn, mockPosition1)
       })
 
       act(() => {
-        actions.handleDrop(mockDragEvent, mockPosition2)
+        const [, currentActions] = result.current
+        currentActions.handleDrop(mockDragEvent, mockPosition2)
       })
 
       expect(mockDragEvent.preventDefault).toHaveBeenCalled()
       expect(mockOnMoveAttempt).not.toHaveBeenCalled()
 
-      const [state] = result.current
-      expect(state.draggedPiece).toBeNull()
+      const [currentState] = result.current
+      expect(currentState.draggedPiece).toBeNull()
     })
 
     it("should handle drop without dragged piece", () => {
@@ -467,19 +468,22 @@ describe("usePieceInteraction", () => {
   })
 
   describe("move validation", () => {
-    it.skip("should return true for valid moves", () => {
+    it("should return true for valid moves", () => {
       const mockMoves = [mockPosition1, mockPosition2]
       mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
       mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
 
       const { result } = renderHook(() => usePieceInteraction(defaultProps))
-      const [, actions] = result.current
 
+      // Select a piece first to have valid moves
       act(() => {
-        actions.selectPiece(mockPosition3, mockWhitePawn)
+        const [, actions] = result.current
+        actions.selectPiece(mockPosition1, mockWhitePawn)
       })
 
-      const isValid = actions.isValidMove(mockPosition1)
+      // Get fresh actions after selection and check if mockPosition2 is a valid move
+      const [, currentActions] = result.current
+      const isValid = currentActions.isValidMove(mockPosition2)
       expect(isValid).toBe(true)
     })
 

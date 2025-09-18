@@ -4,27 +4,27 @@ import { GAME_STATUS } from "../../components/ChessBoard"
 import type {
   CastlingRights,
   ChessBoard as ChessBoardType,
-  ChessPiece as ChessPieceType,
   GameStatus,
   PieceColor,
   Position
 } from "../../components/ChessBoard/ChessBoard.types"
+import type { IChessPiece } from "../../components/pieces"
 import { getLegalMoves } from "../../utils/moves"
 import { isPositionEqual } from "../../utils/position"
 
 export interface PieceInteractionState {
   selectedPiecePosition: Position | null
   validMoves: Position[]
-  draggedPiece: { piece: ChessPieceType; from: Position } | null
+  draggedPiece: { piece: IChessPiece; from: Position } | null
 }
 
 export interface PieceInteractionActions {
   handleSquareClick: (position: Position) => void
-  handleDragStart: (e: React.DragEvent, piece: ChessPieceType, position: Position) => void
+  handleDragStart: (e: React.DragEvent, piece: IChessPiece, position: Position) => void
   handleDragOver: (e: React.DragEvent) => void
   handleDrop: (e: React.DragEvent, position: Position) => void
   clearSelection: () => void
-  selectPiece: (position: Position, piece: ChessPieceType) => void
+  selectPiece: (position: Position, piece: IChessPiece) => void
   isValidMove: (position: Position) => boolean
 }
 
@@ -47,7 +47,7 @@ export const usePieceInteraction = ({
 }: UsePieceInteractionProps): [PieceInteractionState, PieceInteractionActions] => {
   const [selectedPiecePosition, setSelectedPiecePosition] = useState<Position | null>(null)
   const [validMoves, setValidMoves] = useState<Position[]>([])
-  const [draggedPiece, setDraggedPiece] = useState<{ piece: ChessPieceType; from: Position } | null>(null)
+  const [draggedPiece, setDraggedPiece] = useState<{ piece: IChessPiece; from: Position } | null>(null)
 
   const isGameActive = gameStatus !== GAME_STATUS.CHECKMATE && gameStatus !== GAME_STATUS.STALEMATE
 
@@ -57,7 +57,7 @@ export const usePieceInteraction = ({
   }, [])
 
   const selectPiece = useCallback(
-    (position: Position, piece: ChessPieceType) => {
+    (position: Position, piece: IChessPiece) => {
       if (piece.color === currentPlayer && isGameActive) {
         const moves = getLegalMoves(piece, position, board, enPassantTarget, castlingRights)
         setSelectedPiecePosition(position)
@@ -109,7 +109,7 @@ export const usePieceInteraction = ({
   )
 
   const handleDragStart = useCallback(
-    (e: React.DragEvent, piece: ChessPieceType, position: Position) => {
+    (e: React.DragEvent, piece: IChessPiece, position: Position) => {
       if (piece.color !== currentPlayer || !isGameActive) {
         e.preventDefault()
         return

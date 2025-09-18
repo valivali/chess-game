@@ -4,12 +4,12 @@ import { GAME_STATUS, PIECE_COLOR } from "../../components/ChessBoard"
 import type {
   CastlingRights,
   ChessBoard as ChessBoardType,
-  ChessPiece as ChessPieceType,
   GameStatus,
   Move,
   PieceColor,
   Position
 } from "../../components/ChessBoard/ChessBoard.types"
+import type { IChessPiece } from "../../components/pieces"
 import { createInitialBoard } from "../../utils/board"
 import { createInitialCastlingRights } from "../../utils/moves"
 
@@ -19,8 +19,8 @@ export interface GameState {
   enPassantTarget: Position | null
   gameStatus: GameStatus
   winner: PieceColor | null
-  whiteCapturedPieces: ChessPieceType[]
-  blackCapturedPieces: ChessPieceType[]
+  whiteCapturedPieces: IChessPiece[]
+  blackCapturedPieces: IChessPiece[]
   castlingRights: CastlingRights
   lastMove: Move | null
 }
@@ -31,13 +31,13 @@ export interface GameStateActions {
   setEnPassantTarget: (target: Position | null) => void
   setGameStatus: (status: GameStatus) => void
   setWinner: (winner: PieceColor | null) => void
-  setWhiteCapturedPieces: (pieces: ChessPieceType[]) => void
-  setBlackCapturedPieces: (pieces: ChessPieceType[]) => void
+  setWhiteCapturedPieces: (pieces: IChessPiece[]) => void
+  setBlackCapturedPieces: (pieces: IChessPiece[]) => void
   setCastlingRights: (rights: CastlingRights) => void
   setLastMove: (move: Move | null) => void
   resetGame: () => void
   switchPlayer: () => void
-  addCapturedPiece: (piece: ChessPieceType, capturedBy: PieceColor) => void
+  addCapturedPiece: (piece: IChessPiece, capturedBy: PieceColor) => void
 }
 
 export const useGameState = (): [GameState, GameStateActions] => {
@@ -46,8 +46,8 @@ export const useGameState = (): [GameState, GameStateActions] => {
   const [enPassantTarget, setEnPassantTarget] = useState<Position | null>(null)
   const [gameStatus, setGameStatus] = useState<GameStatus>(GAME_STATUS.PLAYING)
   const [winner, setWinner] = useState<PieceColor | null>(null)
-  const [whiteCapturedPieces, setWhiteCapturedPieces] = useState<ChessPieceType[]>([])
-  const [blackCapturedPieces, setBlackCapturedPieces] = useState<ChessPieceType[]>([])
+  const [whiteCapturedPieces, setWhiteCapturedPieces] = useState<IChessPiece[]>([])
+  const [blackCapturedPieces, setBlackCapturedPieces] = useState<IChessPiece[]>([])
   const [castlingRights, setCastlingRights] = useState<CastlingRights>(createInitialCastlingRights)
   const [lastMove, setLastMove] = useState<Move | null>(null)
 
@@ -67,7 +67,7 @@ export const useGameState = (): [GameState, GameStateActions] => {
     setCurrentPlayer((current) => (current === PIECE_COLOR.WHITE ? PIECE_COLOR.BLACK : PIECE_COLOR.WHITE))
   }, [])
 
-  const addCapturedPiece = useCallback((piece: ChessPieceType, capturedBy: PieceColor) => {
+  const addCapturedPiece = useCallback((piece: IChessPiece, capturedBy: PieceColor) => {
     if (capturedBy === PIECE_COLOR.WHITE) {
       setWhiteCapturedPieces((current) => [...current, piece].sort((a, b) => b.weight - a.weight))
     } else {

@@ -1,14 +1,16 @@
 import type { ChessBoard, PieceType } from "../../components/ChessBoard/ChessBoard.types"
-import { PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types"
+import { PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types"
+import { PieceFactory } from "../../components/pieces"
 
 export const createInitialBoard = (): ChessBoard => {
   const board: ChessBoard = Array(8)
     .fill(null)
     .map(() => Array(8).fill(null))
 
+  // Create pawns
   for (let i = 0; i < 8; i++) {
-    board[1][i] = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: PIECE_WEIGHTS[PIECE_TYPE.PAWN] }
-    board[6][i] = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: PIECE_WEIGHTS[PIECE_TYPE.PAWN] }
+    board[1][i] = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
+    board[6][i] = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
   }
 
   const pieceOrder: PieceType[] = [
@@ -22,9 +24,10 @@ export const createInitialBoard = (): ChessBoard => {
     PIECE_TYPE.ROOK
   ]
 
+  // Create back row pieces
   for (let i = 0; i < 8; i++) {
-    board[0][i] = { type: pieceOrder[i], color: PIECE_COLOR.BLACK, weight: PIECE_WEIGHTS[pieceOrder[i]] }
-    board[7][i] = { type: pieceOrder[i], color: PIECE_COLOR.WHITE, weight: PIECE_WEIGHTS[pieceOrder[i]] }
+    board[0][i] = PieceFactory.createPiece(pieceOrder[i], PIECE_COLOR.BLACK)
+    board[7][i] = PieceFactory.createPiece(pieceOrder[i], PIECE_COLOR.WHITE)
   }
 
   return board

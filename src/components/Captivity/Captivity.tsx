@@ -1,10 +1,10 @@
 import "./Captivity.scss"
 
-import type { ChessPiece } from "../ChessBoard/ChessBoard.types.ts"
 import ChessPieceComponent from "../ChessBoard/ChessPiece"
+import type { IChessPiece } from "../pieces"
 
 export interface CaptivityProps {
-  capturedPieces: ChessPiece[]
+  capturedPieces: IChessPiece[]
   className?: string
   scoreDifference?: number
 }

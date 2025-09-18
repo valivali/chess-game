@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-import type { ChessPiece, Position } from "../ChessBoard/ChessBoard.types.ts"
-import { PIECE_COLOR, PIECE_TYPE } from "../ChessBoard/ChessBoard.types.ts"
+import type { ChessPiece, Position } from "../ChessBoard/ChessBoard.types"
+import { PIECE_COLOR, PIECE_TYPE } from "../ChessBoard/ChessBoard.types"
+import { PieceFactory } from "../pieces"
 import ChessSquare from "./ChessSquare"
 
 // Mock the ChessPiece component
@@ -14,7 +15,7 @@ jest.mock("../ChessBoard/ChessPiece", () => {
 
 describe("ChessSquare", () => {
   const mockPosition: Position = { x: 3, y: 4 }
-  const mockPiece: ChessPiece = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 }
+  const mockPiece = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
 
   const defaultProps = {
     position: mockPosition,

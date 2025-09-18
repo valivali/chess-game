@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "@jest/globals"
 
-import type { CastlingRights, ChessBoard, ChessPiece, Position } from "../../components/ChessBoard/ChessBoard.types.ts"
-import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types.ts"
+import type { CastlingRights, ChessBoard, Position } from "../../components/ChessBoard/ChessBoard.types"
+import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types"
+import { PieceFactory } from "../../components/pieces"
 import { createInitialBoard } from "../board/board"
 import {
   canCastle,
@@ -29,7 +30,7 @@ describe("Move Utilities", () => {
     })
 
     it("should return correct pawn moves from starting position", () => {
-      const whitePawn: ChessPiece = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 }
+      const whitePawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
       const moves = getValidMoves(whitePawn, { x: 6, y: 4 }, board)
 
       expect(moves).toHaveLength(2)
@@ -38,7 +39,7 @@ describe("Move Utilities", () => {
     })
 
     it("should return correct knight moves from starting position", () => {
-      const whiteKnight: ChessPiece = { type: PIECE_TYPE.KNIGHT, color: PIECE_COLOR.WHITE, weight: 3 }
+      const whiteKnight = PieceFactory.createPiece(PIECE_TYPE.KNIGHT, PIECE_COLOR.WHITE)
       const moves = getValidMoves(whiteKnight, { x: 7, y: 1 }, board)
 
       expect(moves).toHaveLength(2)
@@ -50,9 +51,10 @@ describe("Move Utilities", () => {
       const emptyBoard: ChessBoard = Array(8)
         .fill(null)
         .map(() => Array(8).fill(null))
-      emptyBoard[4][4] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
+      const whiteRook = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
+      emptyBoard[4][4] = whiteRook
 
-      const moves = getValidMoves({ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }, { x: 4, y: 4 }, emptyBoard)
+      const moves = getValidMoves(whiteRook, { x: 4, y: 4 }, emptyBoard)
 
       expect(moves).toHaveLength(14)
     })
@@ -61,9 +63,10 @@ describe("Move Utilities", () => {
       const emptyBoard: ChessBoard = Array(8)
         .fill(null)
         .map(() => Array(8).fill(null))
-      emptyBoard[4][4] = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
+      const whiteKing = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
+      emptyBoard[4][4] = whiteKing
 
-      const moves = getValidMoves({ type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }, { x: 4, y: 4 }, emptyBoard)
+      const moves = getValidMoves(whiteKing, { x: 4, y: 4 }, emptyBoard)
 
       expect(moves).toHaveLength(8)
     })
@@ -71,7 +74,7 @@ describe("Move Utilities", () => {
 
   describe("isEnPassantCapture", () => {
     it("should detect en passant capture correctly", () => {
-      const pawn: ChessPiece = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 }
+      const pawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
       const from: Position = { x: 3, y: 4 }
       const to: Position = { x: 2, y: 5 }
       const enPassantTarget: Position = { x: 2, y: 5 }
@@ -80,7 +83,7 @@ describe("Move Utilities", () => {
     })
 
     it("should return false for non-pawn pieces", () => {
-      const rook: ChessPiece = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
+      const rook = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
       const from: Position = { x: 3, y: 4 }
       const to: Position = { x: 2, y: 5 }
       const enPassantTarget: Position = { x: 2, y: 5 }
@@ -89,7 +92,7 @@ describe("Move Utilities", () => {
     })
 
     it("should return false when no en passant target", () => {
-      const pawn: ChessPiece = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 }
+      const pawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
       const from: Position = { x: 3, y: 4 }
       const to: Position = { x: 2, y: 5 }
 
@@ -102,11 +105,15 @@ describe("Move Utilities", () => {
       const board: ChessBoard = Array(8)
         .fill(null)
         .map(() => Array(8).fill(null))
-      board[0][4] = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
-      board[0][3] = { type: PIECE_TYPE.BISHOP, color: PIECE_COLOR.WHITE, weight: 3 }
-      board[0][0] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.BLACK, weight: 5 }
+      const whiteKing = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
+      const whiteBishop = PieceFactory.createPiece(PIECE_TYPE.BISHOP, PIECE_COLOR.WHITE)
+      const blackRook = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.BLACK)
 
-      const legalMoves = getLegalMoves({ type: PIECE_TYPE.BISHOP, color: PIECE_COLOR.WHITE, weight: 3 }, { x: 0, y: 3 }, board)
+      board[0][4] = whiteKing
+      board[0][3] = whiteBishop
+      board[0][0] = blackRook
+
+      const legalMoves = getLegalMoves(whiteBishop, { x: 0, y: 3 }, board)
 
       expect(legalMoves.length).toBeLessThan(7)
     })
@@ -178,7 +185,7 @@ describe("Move Utilities", () => {
       })
 
       it("should remove all castling rights when white king moves", () => {
-        const piece: ChessPiece = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
+        const piece = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
         const from: Position = { x: 7, y: 4 }
 
         const newRights = updateCastlingRights(castlingRights, from, piece)
@@ -190,7 +197,7 @@ describe("Move Utilities", () => {
       })
 
       it("should remove all castling rights when black king moves", () => {
-        const piece: ChessPiece = { type: PIECE_TYPE.KING, color: PIECE_COLOR.BLACK, weight: 0 }
+        const piece = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.BLACK)
         const from: Position = { x: 0, y: 4 }
 
         const newRights = updateCastlingRights(castlingRights, from, piece)
@@ -211,13 +218,13 @@ describe("Move Utilities", () => {
           .fill(null)
           .map(() => Array(8).fill(null))
 
-        board[7][4] = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
-        board[7][0] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
-        board[7][7] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
+        board[7][4] = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
+        board[7][0] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
+        board[7][7] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
 
-        board[0][4] = { type: PIECE_TYPE.KING, color: PIECE_COLOR.BLACK, weight: 0 }
-        board[0][0] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.BLACK, weight: 5 }
-        board[0][7] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.BLACK, weight: 5 }
+        board[0][4] = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.BLACK)
+        board[0][0] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.BLACK)
+        board[0][7] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.BLACK)
 
         castlingRights = createInitialCastlingRights()
       })
@@ -250,9 +257,9 @@ describe("Move Utilities", () => {
           .fill(null)
           .map(() => Array(8).fill(null))
 
-        board[7][4] = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
-        board[7][0] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
-        board[7][7] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
+        board[7][4] = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
+        board[7][0] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
+        board[7][7] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
 
         castlingRights = createInitialCastlingRights()
       })
@@ -286,7 +293,7 @@ describe("Move Utilities", () => {
 
     describe("isCastlingMove", () => {
       it("should detect kingside castling move", () => {
-        const king: ChessPiece = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
+        const king = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
         const from: Position = { x: 7, y: 4 }
         const to: Position = { x: 7, y: 6 }
 
@@ -294,7 +301,7 @@ describe("Move Utilities", () => {
       })
 
       it("should detect queenside castling move", () => {
-        const king: ChessPiece = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
+        const king = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
         const from: Position = { x: 7, y: 4 }
         const to: Position = { x: 7, y: 2 }
 
@@ -302,7 +309,7 @@ describe("Move Utilities", () => {
       })
 
       it("should not detect castling for non-king pieces", () => {
-        const rook: ChessPiece = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
+        const rook = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
         const from: Position = { x: 7, y: 4 }
         const to: Position = { x: 7, y: 6 }
 
@@ -310,7 +317,7 @@ describe("Move Utilities", () => {
       })
 
       it("should not detect castling for regular king moves", () => {
-        const king: ChessPiece = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
+        const king = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
         const from: Position = { x: 7, y: 4 }
         const to: Position = { x: 7, y: 5 }
 
@@ -343,9 +350,9 @@ describe("Move Utilities", () => {
           .fill(null)
           .map(() => Array(8).fill(null))
 
-        board[7][4] = { type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 }
-        board[7][0] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
-        board[7][7] = { type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }
+        board[7][4] = PieceFactory.createPiece(PIECE_TYPE.KING, PIECE_COLOR.WHITE)
+        board[7][0] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
+        board[7][7] = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)
 
         castlingRights = createInitialCastlingRights()
       })
@@ -371,35 +378,35 @@ describe("Move Utilities", () => {
   describe("Pawn Promotion", () => {
     describe("isPawnPromotion", () => {
       it("should detect white pawn promotion on row 0", () => {
-        const whitePawn = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 }
+        const whitePawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
         const promotionPosition = { x: 0, y: 4 }
 
         expect(isPawnPromotion(whitePawn, promotionPosition)).toBe(true)
       })
 
       it("should detect black pawn promotion on row 7", () => {
-        const blackPawn = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: 1 }
+        const blackPawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
         const promotionPosition = { x: 7, y: 4 }
 
         expect(isPawnPromotion(blackPawn, promotionPosition)).toBe(true)
       })
 
       it("should not detect promotion for white pawn not on row 0", () => {
-        const whitePawn = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 }
+        const whitePawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
         const nonPromotionPosition = { x: 1, y: 4 }
 
         expect(isPawnPromotion(whitePawn, nonPromotionPosition)).toBe(false)
       })
 
       it("should not detect promotion for black pawn not on row 7", () => {
-        const blackPawn = { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: 1 }
+        const blackPawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
         const nonPromotionPosition = { x: 6, y: 4 }
 
         expect(isPawnPromotion(blackPawn, nonPromotionPosition)).toBe(false)
       })
 
       it("should not detect promotion for non-pawn pieces", () => {
-        const queen = { type: PIECE_TYPE.QUEEN, color: PIECE_COLOR.WHITE, weight: 9 }
+        const queen = PieceFactory.createPiece(PIECE_TYPE.QUEEN, PIECE_COLOR.WHITE)
         const promotionPosition = { x: 0, y: 4 }
 
         expect(isPawnPromotion(queen, promotionPosition)).toBe(false)
@@ -410,21 +417,17 @@ describe("Move Utilities", () => {
       it("should create a white queen from white pawn promotion", () => {
         const promotedQueen = createPromotedQueen(PIECE_COLOR.WHITE)
 
-        expect(promotedQueen).toEqual({
-          type: PIECE_TYPE.QUEEN,
-          color: PIECE_COLOR.WHITE,
-          weight: PIECE_WEIGHTS[PIECE_TYPE.QUEEN]
-        })
+        expect(promotedQueen.type).toBe(PIECE_TYPE.QUEEN)
+        expect(promotedQueen.color).toBe(PIECE_COLOR.WHITE)
+        expect(promotedQueen.weight).toBe(PIECE_WEIGHTS[PIECE_TYPE.QUEEN])
       })
 
       it("should create a black queen from black pawn promotion", () => {
         const promotedQueen = createPromotedQueen(PIECE_COLOR.BLACK)
 
-        expect(promotedQueen).toEqual({
-          type: PIECE_TYPE.QUEEN,
-          color: PIECE_COLOR.BLACK,
-          weight: PIECE_WEIGHTS[PIECE_TYPE.QUEEN]
-        })
+        expect(promotedQueen.type).toBe(PIECE_TYPE.QUEEN)
+        expect(promotedQueen.color).toBe(PIECE_COLOR.BLACK)
+        expect(promotedQueen.weight).toBe(PIECE_WEIGHTS[PIECE_TYPE.QUEEN])
       })
     })
   })

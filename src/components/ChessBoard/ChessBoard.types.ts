@@ -1,3 +1,6 @@
+// Import the new piece interface
+import type { IChessPiece } from "../pieces"
+
 export const PIECE_TYPE = {
   PAWN: "pawn",
   ROOK: "rook",
@@ -34,6 +37,8 @@ export const PIECE_WEIGHTS = {
   [PIECE_TYPE.KING]: 0
 } as const
 
+// Legacy ChessPiece interface - kept for backward compatibility
+// New code should use IChessPiece from lib/pieces
 export interface ChessPiece {
   type: PieceType
   color: PieceColor
@@ -50,7 +55,7 @@ export interface Move {
   to: Position
 }
 
-export type ChessBoard = (ChessPiece | null)[][]
+export type ChessBoard = (IChessPiece | null)[][]
 
 export const CASTLING_SIDE = {
   KINGSIDE: "kingside",

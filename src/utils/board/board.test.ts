@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals"
 
-import type { ChessBoard } from "../../components/ChessBoard/ChessBoard.types.ts"
-import { PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types.ts"
+import type { ChessBoard } from "../../components/ChessBoard/ChessBoard.types"
+import { PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types"
 import { findKingPosition } from "../moves/moves"
 import { createInitialBoard } from "./board"
 
@@ -13,17 +13,26 @@ describe("Board Utilities", () => {
       expect(board).toHaveLength(8)
       expect(board[0]).toHaveLength(8)
 
-      expect(board[0][0]).toEqual({ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.BLACK, weight: 5 })
-      expect(board[0][1]).toEqual({ type: PIECE_TYPE.KNIGHT, color: PIECE_COLOR.BLACK, weight: 3 })
-      expect(board[0][2]).toEqual({ type: PIECE_TYPE.BISHOP, color: PIECE_COLOR.BLACK, weight: 3 })
-      expect(board[0][3]).toEqual({ type: PIECE_TYPE.QUEEN, color: PIECE_COLOR.BLACK, weight: 9 })
-      expect(board[0][4]).toEqual({ type: PIECE_TYPE.KING, color: PIECE_COLOR.BLACK, weight: 0 })
-      expect(board[0][5]).toEqual({ type: PIECE_TYPE.BISHOP, color: PIECE_COLOR.BLACK, weight: 3 })
-      expect(board[0][6]).toEqual({ type: PIECE_TYPE.KNIGHT, color: PIECE_COLOR.BLACK, weight: 3 })
-      expect(board[0][7]).toEqual({ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.BLACK, weight: 5 })
+      expect(board[0][0]?.type).toBe(PIECE_TYPE.ROOK)
+      expect(board[0][0]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][1]?.type).toBe(PIECE_TYPE.KNIGHT)
+      expect(board[0][1]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][2]?.type).toBe(PIECE_TYPE.BISHOP)
+      expect(board[0][2]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][3]?.type).toBe(PIECE_TYPE.QUEEN)
+      expect(board[0][3]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][4]?.type).toBe(PIECE_TYPE.KING)
+      expect(board[0][4]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][5]?.type).toBe(PIECE_TYPE.BISHOP)
+      expect(board[0][5]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][6]?.type).toBe(PIECE_TYPE.KNIGHT)
+      expect(board[0][6]?.color).toBe(PIECE_COLOR.BLACK)
+      expect(board[0][7]?.type).toBe(PIECE_TYPE.ROOK)
+      expect(board[0][7]?.color).toBe(PIECE_COLOR.BLACK)
 
       for (let i = 0; i < 8; i++) {
-        expect(board[1][i]).toEqual({ type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: 1 })
+        expect(board[1][i]?.type).toBe(PIECE_TYPE.PAWN)
+        expect(board[1][i]?.color).toBe(PIECE_COLOR.BLACK)
       }
 
       for (let row = 2; row < 6; row++) {
@@ -33,17 +42,26 @@ describe("Board Utilities", () => {
       }
 
       for (let i = 0; i < 8; i++) {
-        expect(board[6][i]).toEqual({ type: PIECE_TYPE.PAWN, color: PIECE_COLOR.WHITE, weight: 1 })
+        expect(board[6][i]?.type).toBe(PIECE_TYPE.PAWN)
+        expect(board[6][i]?.color).toBe(PIECE_COLOR.WHITE)
       }
 
-      expect(board[7][0]).toEqual({ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 })
-      expect(board[7][1]).toEqual({ type: PIECE_TYPE.KNIGHT, color: PIECE_COLOR.WHITE, weight: 3 })
-      expect(board[7][2]).toEqual({ type: PIECE_TYPE.BISHOP, color: PIECE_COLOR.WHITE, weight: 3 })
-      expect(board[7][3]).toEqual({ type: PIECE_TYPE.QUEEN, color: PIECE_COLOR.WHITE, weight: 9 })
-      expect(board[7][4]).toEqual({ type: PIECE_TYPE.KING, color: PIECE_COLOR.WHITE, weight: 0 })
-      expect(board[7][5]).toEqual({ type: PIECE_TYPE.BISHOP, color: PIECE_COLOR.WHITE, weight: 3 })
-      expect(board[7][6]).toEqual({ type: PIECE_TYPE.KNIGHT, color: PIECE_COLOR.WHITE, weight: 3 })
-      expect(board[7][7]).toEqual({ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 })
+      expect(board[7][0]?.type).toBe(PIECE_TYPE.ROOK)
+      expect(board[7][0]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][1]?.type).toBe(PIECE_TYPE.KNIGHT)
+      expect(board[7][1]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][2]?.type).toBe(PIECE_TYPE.BISHOP)
+      expect(board[7][2]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][3]?.type).toBe(PIECE_TYPE.QUEEN)
+      expect(board[7][3]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][4]?.type).toBe(PIECE_TYPE.KING)
+      expect(board[7][4]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][5]?.type).toBe(PIECE_TYPE.BISHOP)
+      expect(board[7][5]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][6]?.type).toBe(PIECE_TYPE.KNIGHT)
+      expect(board[7][6]?.color).toBe(PIECE_COLOR.WHITE)
+      expect(board[7][7]?.type).toBe(PIECE_TYPE.ROOK)
+      expect(board[7][7]?.color).toBe(PIECE_COLOR.WHITE)
     })
   })
 

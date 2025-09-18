@@ -13,17 +13,22 @@ Welcome to an elegant chess experience! This project brings the timeless game of
 ### ✨ Features
 
 - 🎮 **Interactive Gameplay** - Click and play with intuitive piece movement
-- 🎨 **Beautiful UI** - Modern design with smooth animations
+- 🎨 **Beautiful UI** - Modern design with smooth animations and drag & drop support
 - 📱 **Responsive Design** - Play on desktop, tablet, or mobile
-- ♟️ **Complete Chess Set** - All pieces with proper chess logic
-- 🎉 **Celebration Effects** - Victory animations when you win
-- 🧪 **Well Tested** - Comprehensive test suite with Jest
+- ♟️ **Complete Chess Set** - All pieces with proper chess logic including:
+  - 🏰 **Castling** - Both kingside and queenside castling
+  - 👻 **En Passant** - Special pawn capture rules
+  - 👑 **Pawn Promotion** - Automatic queen promotion when pawns reach the end
+  - ⚔️ **Check Detection** - Real-time check, checkmate, and stalemate detection
+- 📊 **Score Tracking** - Live captured pieces display with material advantage
+- 🎉 **Celebration Effects** - Victory animations with confetti and fireworks
+- 🧪 **Well Tested** - Comprehensive test suite with Jest and React Testing Library
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-Make sure you have [Node.js](https://nodejs.org/) (version 16 or higher) installed on your machine.
+Make sure you have [Node.js](https://nodejs.org/) (version 18 or higher) installed on your machine.
 
 ### Installation
 
@@ -54,8 +59,16 @@ That's it! 🎉 You're ready to play chess!
 
 1. **Start a Game** - Click "Start Game" from the welcome screen
 2. **Move Pieces** - Click on a piece to select it, then click on a valid square to move
-3. **Strategic Thinking** - Plan your moves carefully to outmaneuver your opponent
-4. **Enjoy!** - Have fun and improve your chess skills
+   - Alternatively, drag and drop pieces to move them
+   - Valid moves are highlighted in green when a piece is selected
+3. **Special Moves** - The game supports all standard chess rules:
+   - **Castling**: Click the king and then the target square (2 squares away)
+   - **En Passant**: Automatic when conditions are met
+   - **Pawn Promotion**: Pawns automatically promote to queens at the end
+4. **Game Status** - Watch for check warnings and game-ending conditions
+5. **Captured Pieces** - View captured pieces and material advantage on the sides
+6. **Victory** - Enjoy the celebration when you achieve checkmate!
+7. **New Game** - Click "New Game" in the celebration screen to play again
 
 ## 🛠️ Development
 
@@ -78,13 +91,29 @@ src/
 ├── components/          # Reusable UI components
 │   ├── ChessBoard/     # Main chess board component
 │   ├── ChessSquare/    # Individual square component
+│   ├── Captivity/      # Captured pieces display
 │   ├── Celebration/    # Victory celebration effects
-│   └── ui/             # Generic UI components
+│   ├── pieces/         # Chess piece logic classes
+│   └── ui/             # Generic UI components (button, card, separator)
 ├── pages/              # Application pages
 │   ├── welcome/        # Welcome/landing page
 │   └── game/           # Main game page
+├── hooks/              # Custom React hooks
+│   ├── useChessGame/   # Main game state management
+│   ├── useGameState/   # Core game state
+│   ├── useMoveLogic/   # Move validation and execution
+│   ├── usePieceInteraction/ # Piece selection and interaction
+│   ├── useGameStatus/  # Check/checkmate/stalemate detection
+│   ├── useUIState/     # UI state management
+│   ├── useConfettiAnimation/ # Confetti effects
+│   └── useFireworkAnimation/ # Firework effects
 ├── assets/             # Chess piece SVG components
 ├── utils/              # Chess game logic and utilities
+│   ├── board/          # Board initialization and utilities
+│   ├── game/           # Game status and scoring
+│   ├── moves/          # Move validation and chess rules
+│   ├── piece/          # Piece utility functions
+│   └── position/       # Position calculations
 └── types/              # TypeScript type definitions
 ```
 
@@ -112,7 +141,9 @@ npm run test:coverage
 - **🧭 React Router** - Client-side routing
 - **🧪 Jest** - Testing framework
 - **🎭 React Testing Library** - Component testing utilities
-- **🎯 Radix UI** - Accessible UI primitives
+- **🎯 Radix UI** - Accessible UI primitives (Dialog, Separator, Slot)
+- **🔄 ts-pattern** - Functional pattern matching for TypeScript
+- **🎨 ESLint + Prettier** - Code formatting and linting
 
 ## 🤝 Contributing
 
@@ -134,11 +165,14 @@ This project is open source and available under the [MIT License](LICENSE).
 
 - [ ] 🤖 AI opponent with different difficulty levels
 - [ ] 💾 Save and load game states
-- [ ] 📊 Move history and game analysis
+- [ ] 📊 Move history and notation display
 - [ ] 🌐 Online multiplayer support
-- [ ] 🏆 Achievement system
+- [ ] 🏆 Achievement system and statistics
 - [ ] 🎵 Sound effects and music
 - [ ] 🌙 Dark/light theme toggle
+- [ ] ⏰ Chess clock/timer functionality
+- [ ] 🔄 Undo/redo moves
+- [ ] 📱 Progressive Web App (PWA) support
 
 ---
 

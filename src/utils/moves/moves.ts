@@ -1,12 +1,7 @@
-import type {
-  CastlingRights,
-  CastlingSide,
-  ChessBoard,
-  ChessPiece,
-  PieceColor,
-  Position
-} from "../../components/ChessBoard/ChessBoard.types"
-import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../../components/ChessBoard/ChessBoard.types"
+import type { CastlingRights, CastlingSide, ChessBoard, PieceColor, Position } from "../../components/ChessBoard/ChessBoard.types"
+import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types"
+import type { IChessPiece } from "../../components/pieces"
+import { PieceFactory } from "../../components/pieces"
 import { isPositionEqual, isValidPosition } from "../position/position"
 
 const KNIGHT_MOVES = [
@@ -109,7 +104,7 @@ const getJumpingMoves = (
   return validMoves
 }
 
-const getPawnMoves = (x: number, y: number, piece: ChessPiece, board: ChessBoard, enPassantTarget?: Position | null): Position[] => {
+const getPawnMoves = (x: number, y: number, piece: IChessPiece, board: ChessBoard, enPassantTarget?: Position | null): Position[] => {
   const moves: Position[] = []
   const direction = piece.color === PIECE_COLOR.WHITE ? -1 : 1
   const startRow = piece.color === PIECE_COLOR.WHITE ? 6 : 1
@@ -161,7 +156,7 @@ const getPawnMoves = (x: number, y: number, piece: ChessPiece, board: ChessBoard
   return moves
 }
 
-const getKingMoves = (x: number, y: number, piece: ChessPiece, board: ChessBoard, castlingRights?: CastlingRights): Position[] => {
+const getKingMoves = (x: number, y: number, piece: IChessPiece, board: ChessBoard, castlingRights?: CastlingRights): Position[] => {
   const regularMoves = getJumpingMoves(x, y, KING_MOVES, board, piece.color)
 
   if (castlingRights) {
@@ -174,19 +169,19 @@ const getKingMoves = (x: number, y: number, piece: ChessPiece, board: ChessBoard
 
 const moveFunctions = {
   [PIECE_TYPE.PAWN]: getPawnMoves,
-  [PIECE_TYPE.ROOK]: (x: number, y: number, piece: ChessPiece, board: ChessBoard) =>
+  [PIECE_TYPE.ROOK]: (x: number, y: number, piece: IChessPiece, board: ChessBoard) =>
     getSlidingMoves(x, y, ROOK_DIRECTIONS, board, piece.color),
-  [PIECE_TYPE.KNIGHT]: (x: number, y: number, piece: ChessPiece, board: ChessBoard) =>
+  [PIECE_TYPE.KNIGHT]: (x: number, y: number, piece: IChessPiece, board: ChessBoard) =>
     getJumpingMoves(x, y, KNIGHT_MOVES, board, piece.color),
-  [PIECE_TYPE.BISHOP]: (x: number, y: number, piece: ChessPiece, board: ChessBoard) =>
+  [PIECE_TYPE.BISHOP]: (x: number, y: number, piece: IChessPiece, board: ChessBoard) =>
     getSlidingMoves(x, y, BISHOP_DIRECTIONS, board, piece.color),
-  [PIECE_TYPE.QUEEN]: (x: number, y: number, piece: ChessPiece, board: ChessBoard) =>
+  [PIECE_TYPE.QUEEN]: (x: number, y: number, piece: IChessPiece, board: ChessBoard) =>
     getSlidingMoves(x, y, QUEEN_DIRECTIONS, board, piece.color),
   [PIECE_TYPE.KING]: getKingMoves
 } as const
 
 export const getValidMoves = (
-  piece: ChessPiece,
+  piece: IChessPiece,
   position: Position,
   board: ChessBoard,
   enPassantTarget?: Position | null,
@@ -203,7 +198,7 @@ export const getValidMoves = (
   return moveFunction(x, y, piece, board)
 }
 
-export const isEnPassantCapture = (piece: ChessPiece, from: Position, to: Position, enPassantTarget: Position | null): boolean => {
+export const isEnPassantCapture = (piece: IChessPiece, from: Position, to: Position, enPassantTarget: Position | null): boolean => {
   if (!enPassantTarget || piece.type !== PIECE_TYPE.PAWN) {
     return false
   }
@@ -272,7 +267,7 @@ export const wouldLeaveKingInCheck = (
 }
 
 export const getLegalMoves = (
-  piece: ChessPiece,
+  piece: IChessPiece,
   position: Position,
   board: ChessBoard,
   enPassantTarget?: Position | null,
@@ -341,7 +336,7 @@ export const createInitialCastlingRights = (): CastlingRights => ({
   }
 })
 
-export const updateCastlingRights = (castlingRights: CastlingRights, from: Position, piece: ChessPiece): CastlingRights => {
+export const updateCastlingRights = (castlingRights: CastlingRights, from: Position, piece: IChessPiece): CastlingRights => {
   const newRights = {
     white: { ...castlingRights.white },
     black: { ...castlingRights.black }
@@ -437,7 +432,7 @@ export const getCastlingMoves = (board: ChessBoard, playerColor: string, castlin
   return moves
 }
 
-export const isCastlingMove = (from: Position, to: Position, piece: ChessPiece): boolean => {
+export const isCastlingMove = (from: Position, to: Position, piece: IChessPiece): boolean => {
   if (piece.type !== PIECE_TYPE.KING) {
     return false
   }
@@ -471,7 +466,7 @@ export const isInCheck = (board: ChessBoard, playerColor: string): boolean => {
   return isPositionUnderAttack(board, kingPosition, opponentColor)
 }
 
-export const isPawnPromotion = (piece: ChessPiece, to: Position): boolean => {
+export const isPawnPromotion = (piece: IChessPiece, to: Position): boolean => {
   if (piece.type !== PIECE_TYPE.PAWN) {
     return false
   }
@@ -481,10 +476,6 @@ export const isPawnPromotion = (piece: ChessPiece, to: Position): boolean => {
   return to.x === promotionRow
 }
 
-export const createPromotedQueen = (pawnColor: string): ChessPiece => {
-  return {
-    type: PIECE_TYPE.QUEEN,
-    color: pawnColor as PieceColor,
-    weight: PIECE_WEIGHTS[PIECE_TYPE.QUEEN]
-  }
+export const createPromotedQueen = (pawnColor: string): IChessPiece => {
+  return PieceFactory.createPromotedQueen(pawnColor as PieceColor)
 }

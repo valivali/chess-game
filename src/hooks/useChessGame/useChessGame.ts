@@ -3,12 +3,12 @@ import React, { useCallback } from "react"
 import type {
   CastlingRights,
   ChessBoard as ChessBoardType,
-  ChessPiece as ChessPieceType,
   GameStatus,
   Move,
   PieceColor,
   Position
 } from "../../components/ChessBoard/ChessBoard.types"
+import type { IChessPiece } from "../../components/pieces"
 import { updateCastlingRights } from "../../utils/moves"
 import { useGameState } from "../useGameState"
 import { useGameStatus } from "../useGameStatus"
@@ -21,13 +21,13 @@ export interface ChessGameState {
   selectedPiecePosition: Position | null
   validMoves: Position[]
   currentPlayer: PieceColor
-  draggedPiece: { piece: ChessPieceType; from: Position } | null
+  draggedPiece: { piece: IChessPiece; from: Position } | null
   enPassantTarget: Position | null
   gameStatus: GameStatus
   showCelebration: boolean
   winner: PieceColor | null
-  whiteCapturedPieces: ChessPieceType[]
-  blackCapturedPieces: ChessPieceType[]
+  whiteCapturedPieces: IChessPiece[]
+  blackCapturedPieces: IChessPiece[]
   castlingRights: CastlingRights
   lastMove: Move | null
 }
@@ -35,7 +35,7 @@ export interface ChessGameState {
 export interface ChessGameActions {
   makeMove: (from: Position, to: Position) => void
   handleSquareClick: (position: Position) => void
-  handleDragStart: (e: React.DragEvent, piece: ChessPieceType, position: Position) => void
+  handleDragStart: (e: React.DragEvent, piece: IChessPiece, position: Position) => void
   handleDragOver: (e: React.DragEvent) => void
   handleDrop: (e: React.DragEvent, position: Position) => void
   handleCelebrationComplete: () => void

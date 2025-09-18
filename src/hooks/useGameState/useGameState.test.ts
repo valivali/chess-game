@@ -1,8 +1,9 @@
 import { describe, expect, it } from "@jest/globals"
 import { act, renderHook } from "@testing-library/react"
 
-import { GAME_STATUS, PIECE_COLOR } from "../../components/ChessBoard"
-import type { ChessPiece, Move, Position } from "../../components/ChessBoard/ChessBoard.types"
+import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard"
+import type { Move, Position } from "../../components/ChessBoard/ChessBoard.types"
+import { PieceFactory } from "../../components/pieces"
 import { createInitialBoard } from "../../utils/board"
 import { createInitialCastlingRights } from "../../utils/moves"
 import { useGameState } from "./useGameState"
@@ -13,17 +14,8 @@ describe("useGameState", () => {
     to: { x: 3, y: 0 }
   }
 
-  const mockWhitePawn: ChessPiece = {
-    type: "pawn",
-    color: PIECE_COLOR.WHITE,
-    weight: 1
-  }
-
-  const mockBlackQueen: ChessPiece = {
-    type: "queen",
-    color: PIECE_COLOR.BLACK,
-    weight: 9
-  }
+  const mockWhitePawn = PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.WHITE)
+  const mockBlackQueen = PieceFactory.createPiece(PIECE_TYPE.QUEEN, PIECE_COLOR.BLACK)
 
   describe("initial state", () => {
     it("should initialize with correct default values", () => {
@@ -199,11 +191,7 @@ describe("useGameState", () => {
       const { result } = renderHook(() => useGameState())
       const [, actions] = result.current
 
-      const mockBlackRook: ChessPiece = {
-        type: "rook",
-        color: PIECE_COLOR.BLACK,
-        weight: 5
-      }
+      const mockBlackRook = PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.BLACK)
 
       act(() => {
         actions.addCapturedPiece(mockWhitePawn, PIECE_COLOR.WHITE) // Weight: 1
@@ -225,17 +213,8 @@ describe("useGameState", () => {
       const { result } = renderHook(() => useGameState())
       const [, actions] = result.current
 
-      const mockWhiteKnight: ChessPiece = {
-        type: "knight",
-        color: PIECE_COLOR.WHITE,
-        weight: 3
-      }
-
-      const mockWhiteQueen: ChessPiece = {
-        type: "queen",
-        color: PIECE_COLOR.WHITE,
-        weight: 9
-      }
+      const mockWhiteKnight = PieceFactory.createPiece(PIECE_TYPE.KNIGHT, PIECE_COLOR.WHITE)
+      const mockWhiteQueen = PieceFactory.createPiece(PIECE_TYPE.QUEEN, PIECE_COLOR.WHITE)
 
       act(() => {
         actions.addCapturedPiece(mockWhitePawn, PIECE_COLOR.BLACK) // Weight: 1

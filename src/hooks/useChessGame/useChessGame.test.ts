@@ -6,10 +6,15 @@ import type { ChessPiece, Move, Position } from "../../components/ChessBoard/Che
 import { createInitialBoard } from "../../utils/board"
 import { createInitialCastlingRights } from "../../utils/moves"
 import * as movesUtils from "../../utils/moves"
+import { useGameState } from "../useGameState"
+import { useGameStatus } from "../useGameStatus"
+import { useMoveLogic } from "../useMoveLogic"
+import { usePieceInteraction } from "../usePieceInteraction"
+import { useUIState } from "../useUIState"
 import { useChessGame } from "./useChessGame"
 
 jest.mock("../useGameState", () => ({
-  useGameState: () => [
+  useGameState: jest.fn(() => [
     {
       board: [],
       currentPlayer: "white",
@@ -32,58 +37,23 @@ jest.mock("../useGameState", () => ({
       setWinner: jest.fn(),
       resetGame: jest.fn()
     }
-  ]
-}))
-
-jest.mock("../useGameStatus", () => ({
-  useGameStatus: () => ({
-    checkForGameEnd: jest.fn().mockReturnValue({
-      status: "playing",
-      isGameOver: false,
-      winner: null
-    })
-  })
-}))
-
-jest.mock("../useMoveLogic", () => ({
-  useMoveLogic: () => ({
-    executePieceMove: jest.fn().mockReturnValue({
-      capturedPiece: null,
-      newEnPassantTarget: null
-    }),
-    createBoardCopy: jest.fn().mockReturnValue([])
-  })
+  ])
 }))
 
 jest.mock("../usePieceInteraction", () => ({
-  usePieceInteraction: () => [
-    {
-      selectedPiecePosition: null,
-      validMoves: [],
-      draggedPiece: null
-    },
-    {
-      handleSquareClick: jest.fn(),
-      handleDragStart: jest.fn(),
-      handleDragOver: jest.fn(),
-      handleDrop: jest.fn()
-    }
-  ]
+  usePieceInteraction: jest.fn()
+}))
+
+jest.mock("../useMoveLogic", () => ({
+  useMoveLogic: jest.fn()
 }))
 
 jest.mock("../useUIState", () => ({
-  useUIState: () => [
-    {
-      showCelebration: false,
-      lastMove: null
-    },
-    {
-      setLastMove: jest.fn(),
-      setShowCelebration: jest.fn(),
-      handleCelebrationComplete: jest.fn(),
-      isSquareHighlighted: jest.fn().mockReturnValue(false)
-    }
-  ]
+  useUIState: jest.fn()
+}))
+
+jest.mock("../useGameStatus", () => ({
+  useGameStatus: jest.fn()
 }))
 
 // Mock moves utils
@@ -118,6 +88,27 @@ describe("useChessGame", () => {
 
   describe("hook structure", () => {
     it("should return state and actions in correct format", () => {
+      ;(useGameState as jest.Mock).mockReturnValue([{}, {}])
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([
+        {},
+        {
+          handleSquareClick: jest.fn(),
+          handleDragStart: jest.fn(),
+          handleDragOver: jest.fn(),
+          handleDrop: jest.fn(),
+          clearSelection: jest.fn()
+        }
+      ])
+      ;(useMoveLogic as jest.Mock).mockReturnValue({ executePieceMove: jest.fn(), createBoardCopy: jest.fn() })
+      ;(useGameStatus as jest.Mock).mockReturnValue({ checkForGameEnd: jest.fn() })
+      ;(useUIState as jest.Mock).mockReturnValue([
+        {},
+        {
+          handleCelebrationComplete: jest.fn(),
+          isSquareHighlighted: jest.fn()
+        }
+      ])
+
       const { result } = renderHook(() => useChessGame())
       const [state, actions] = result.current
 
@@ -153,7 +144,7 @@ describe("useChessGame", () => {
     })
   })
 
-  describe.skip("makeMove function", () => {
+  describe("makeMove function", () => {
     it("should handle a basic move without capture", () => {
       const mockGameStateActions = {
         setBoard: jest.fn(),
@@ -190,7 +181,7 @@ describe("useChessGame", () => {
         })
       }
 
-      require("../useGameState").useGameState.mockReturnValue([
+      ;(useGameState as jest.Mock).mockReturnValue([
         {
           board: [[mockPiece]],
           currentPlayer: PIECE_COLOR.WHITE,
@@ -204,10 +195,10 @@ describe("useChessGame", () => {
         },
         mockGameStateActions
       ])
-
-      require("../useMoveLogic").useMoveLogic.mockReturnValue(mockMoveLogic)
-      require("../useGameStatus").useGameStatus.mockReturnValue(mockGameStatus)
-      require("../useUIState").useUIState.mockReturnValue([{}, mockUIStateActions])
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([{}, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue(mockMoveLogic)
+      ;(useGameStatus as jest.Mock).mockReturnValue(mockGameStatus)
+      ;(useUIState as jest.Mock).mockReturnValue([{}, mockUIStateActions])
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -252,7 +243,7 @@ describe("useChessGame", () => {
         createBoardCopy: jest.fn().mockReturnValue([[mockPiece]])
       }
 
-      require("../useGameState").useGameState.mockReturnValue([
+      ;(useGameState as jest.Mock).mockReturnValue([
         {
           board: [[mockPiece]],
           currentPlayer: PIECE_COLOR.WHITE,
@@ -266,8 +257,8 @@ describe("useChessGame", () => {
         },
         mockGameStateActions
       ])
-
-      require("../useMoveLogic").useMoveLogic.mockReturnValue(mockMoveLogic)
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([{}, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue(mockMoveLogic)
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -307,7 +298,7 @@ describe("useChessGame", () => {
         })
       }
 
-      require("../useGameState").useGameState.mockReturnValue([
+      ;(useGameState as jest.Mock).mockReturnValue([
         {
           board: [[mockPiece]],
           currentPlayer: PIECE_COLOR.BLACK,
@@ -321,9 +312,8 @@ describe("useChessGame", () => {
         },
         mockGameStateActions
       ])
-
-      require("../useGameStatus").useGameStatus.mockReturnValue(mockGameStatus)
-      require("../useUIState").useUIState.mockReturnValue([{}, mockUIStateActions])
+      ;(useGameStatus as jest.Mock).mockReturnValue(mockGameStatus)
+      ;(useUIState as jest.Mock).mockReturnValue([{}, mockUIStateActions])
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -355,7 +345,7 @@ describe("useChessGame", () => {
         createBoardCopy: jest.fn().mockReturnValue([[null]]) // No piece at position
       }
 
-      require("../useGameState").useGameState.mockReturnValue([
+      ;(useGameState as jest.Mock).mockReturnValue([
         {
           board: [[null]],
           currentPlayer: PIECE_COLOR.WHITE,
@@ -369,8 +359,7 @@ describe("useChessGame", () => {
         },
         mockGameStateActions
       ])
-
-      require("../useMoveLogic").useMoveLogic.mockReturnValue(mockMoveLogic)
+      ;(useMoveLogic as jest.Mock).mockReturnValue(mockMoveLogic)
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -411,7 +400,7 @@ describe("useChessGame", () => {
         createBoardCopy: jest.fn().mockReturnValue([[mockPiece]])
       }
 
-      require("../useGameState").useGameState.mockReturnValue([
+      ;(useGameState as jest.Mock).mockReturnValue([
         {
           board: [[mockPiece]],
           currentPlayer: PIECE_COLOR.WHITE,
@@ -425,8 +414,8 @@ describe("useChessGame", () => {
         },
         mockGameStateActions
       ])
-
-      require("../useMoveLogic").useMoveLogic.mockReturnValue(mockMoveLogic)
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([{}, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue(mockMoveLogic)
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -440,7 +429,7 @@ describe("useChessGame", () => {
     })
   })
 
-  describe.skip("action delegation", () => {
+  describe("action delegation", () => {
     it("should delegate piece interaction actions correctly", () => {
       const mockPieceInteractionActions = {
         handleSquareClick: jest.fn(),
@@ -449,7 +438,11 @@ describe("useChessGame", () => {
         handleDrop: jest.fn()
       }
 
-      require("../usePieceInteraction").usePieceInteraction.mockReturnValue([{}, mockPieceInteractionActions])
+      ;(useGameState as jest.Mock).mockReturnValue([{}, {}])
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([{}, mockPieceInteractionActions])
+      ;(useMoveLogic as jest.Mock).mockReturnValue({ executePieceMove: jest.fn(), createBoardCopy: jest.fn() })
+      ;(useGameStatus as jest.Mock).mockReturnValue({ checkForGameEnd: jest.fn() })
+      ;(useUIState as jest.Mock).mockReturnValue([{}, {}])
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -469,7 +462,11 @@ describe("useChessGame", () => {
         isSquareHighlighted: jest.fn()
       }
 
-      require("../useUIState").useUIState.mockReturnValue([{}, mockUIStateActions])
+      ;(useGameState as jest.Mock).mockReturnValue([{}, {}])
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([{}, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue({ executePieceMove: jest.fn(), createBoardCopy: jest.fn() })
+      ;(useGameStatus as jest.Mock).mockReturnValue({ checkForGameEnd: jest.fn() })
+      ;(useUIState as jest.Mock).mockReturnValue([{}, mockUIStateActions])
 
       const { result } = renderHook(() => useChessGame())
       const [, actions] = result.current
@@ -479,7 +476,7 @@ describe("useChessGame", () => {
     })
   })
 
-  describe.skip("state combination", () => {
+  describe("state combination", () => {
     it("should combine state from all hooks correctly", () => {
       const mockGameState = {
         board: createInitialBoard(),
@@ -504,9 +501,11 @@ describe("useChessGame", () => {
         lastMove: mockMove
       }
 
-      require("../useGameState").useGameState.mockReturnValue([mockGameState, {}])
-      require("../usePieceInteraction").usePieceInteraction.mockReturnValue([mockPieceInteractionState, {}])
-      require("../useUIState").useUIState.mockReturnValue([mockUIState, {}])
+      ;(useGameState as jest.Mock).mockReturnValue([mockGameState, {}])
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([mockPieceInteractionState, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue({ executePieceMove: jest.fn(), createBoardCopy: jest.fn() })
+      ;(useGameStatus as jest.Mock).mockReturnValue({ checkForGameEnd: jest.fn() })
+      ;(useUIState as jest.Mock).mockReturnValue([mockUIState, {}])
 
       const { result } = renderHook(() => useChessGame())
       const [state] = result.current
@@ -529,7 +528,7 @@ describe("useChessGame", () => {
     })
   })
 
-  describe.skip("hook integration", () => {
+  describe("hook integration", () => {
     it("should pass correct props to usePieceInteraction", () => {
       const mockGameState = {
         board: createInitialBoard(),
@@ -544,9 +543,11 @@ describe("useChessGame", () => {
       }
 
       const mockUsePieceInteraction = jest.fn().mockReturnValue([{}, {}])
-      require("../usePieceInteraction").usePieceInteraction = mockUsePieceInteraction
-
-      require("../useGameState").useGameState.mockReturnValue([mockGameState, {}])
+      ;(usePieceInteraction as jest.Mock).mockImplementation(mockUsePieceInteraction)
+      ;(useGameState as jest.Mock).mockReturnValue([mockGameState, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue({ executePieceMove: jest.fn(), createBoardCopy: jest.fn() })
+      ;(useGameStatus as jest.Mock).mockReturnValue({ checkForGameEnd: jest.fn() })
+      ;(useUIState as jest.Mock).mockReturnValue([{}, {}])
 
       renderHook(() => useChessGame())
 
@@ -574,9 +575,11 @@ describe("useChessGame", () => {
       }
 
       const mockUseUIState = jest.fn().mockReturnValue([{}, {}])
-      require("../useUIState").useUIState = mockUseUIState
-
-      require("../useGameState").useGameState.mockReturnValue([{}, mockGameStateActions])
+      ;(useUIState as jest.Mock).mockImplementation(mockUseUIState)
+      ;(useGameState as jest.Mock).mockReturnValue([{}, mockGameStateActions])
+      ;(usePieceInteraction as jest.Mock).mockReturnValue([{}, {}])
+      ;(useMoveLogic as jest.Mock).mockReturnValue({ executePieceMove: jest.fn(), createBoardCopy: jest.fn() })
+      ;(useGameStatus as jest.Mock).mockReturnValue({ checkForGameEnd: jest.fn() })
 
       renderHook(() => useChessGame())
 

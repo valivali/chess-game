@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@jest/globals"
 
-import type { ChessPiece } from "../../components/ChessBoard/ChessBoard.types.ts"
-import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types.ts"
+import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "../../components/ChessBoard/ChessBoard.types"
+import type { IChessPiece } from "../../components/pieces"
+import { PieceFactory } from "../../components/pieces"
 import {
   calculateScoreAdvantages,
   getCurrentPlayerDisplayText,
@@ -14,11 +15,11 @@ import {
 describe("Game Utilities", () => {
   describe("calculateScoreAdvantages", () => {
     it("should calculate white advantage correctly", () => {
-      const whiteCapturedPieces: ChessPiece[] = [
-        { type: PIECE_TYPE.QUEEN, color: PIECE_COLOR.BLACK, weight: 9 },
-        { type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: 1 }
+      const whiteCapturedPieces: IChessPiece[] = [
+        PieceFactory.createPiece(PIECE_TYPE.QUEEN, PIECE_COLOR.BLACK),
+        PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)
       ]
-      const blackCapturedPieces: ChessPiece[] = [{ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }]
+      const blackCapturedPieces: IChessPiece[] = [PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)]
 
       const result = calculateScoreAdvantages(whiteCapturedPieces, blackCapturedPieces)
 
@@ -27,8 +28,8 @@ describe("Game Utilities", () => {
     })
 
     it("should calculate black advantage correctly", () => {
-      const whiteCapturedPieces: ChessPiece[] = [{ type: PIECE_TYPE.PAWN, color: PIECE_COLOR.BLACK, weight: 1 }]
-      const blackCapturedPieces: ChessPiece[] = [{ type: PIECE_TYPE.QUEEN, color: PIECE_COLOR.WHITE, weight: 9 }]
+      const whiteCapturedPieces: IChessPiece[] = [PieceFactory.createPiece(PIECE_TYPE.PAWN, PIECE_COLOR.BLACK)]
+      const blackCapturedPieces: IChessPiece[] = [PieceFactory.createPiece(PIECE_TYPE.QUEEN, PIECE_COLOR.WHITE)]
 
       const result = calculateScoreAdvantages(whiteCapturedPieces, blackCapturedPieces)
 
@@ -37,8 +38,8 @@ describe("Game Utilities", () => {
     })
 
     it("should return no advantage when scores are equal", () => {
-      const whiteCapturedPieces: ChessPiece[] = [{ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.BLACK, weight: 5 }]
-      const blackCapturedPieces: ChessPiece[] = [{ type: PIECE_TYPE.ROOK, color: PIECE_COLOR.WHITE, weight: 5 }]
+      const whiteCapturedPieces: IChessPiece[] = [PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.BLACK)]
+      const blackCapturedPieces: IChessPiece[] = [PieceFactory.createPiece(PIECE_TYPE.ROOK, PIECE_COLOR.WHITE)]
 
       const result = calculateScoreAdvantages(whiteCapturedPieces, blackCapturedPieces)
 

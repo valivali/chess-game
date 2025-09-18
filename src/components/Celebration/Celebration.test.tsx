@@ -140,16 +140,16 @@ describe("Celebration", () => {
     })
   })
 
-  it("should clean up intervals on unmount", () => {
-    const clearIntervalSpy = jest.spyOn(global, "clearInterval")
+  it("should clean up animation frames on unmount", () => {
+    const cancelAnimationFrameSpy = jest.spyOn(global, "cancelAnimationFrame")
 
     const { unmount } = render(<Celebration winner="white" onComplete={mockOnComplete} />)
 
     unmount()
 
-    expect(clearIntervalSpy).toHaveBeenCalledTimes(3)
+    expect(cancelAnimationFrameSpy).toHaveBeenCalled()
 
-    clearIntervalSpy.mockRestore()
+    cancelAnimationFrameSpy.mockRestore()
   })
 
   it("should limit confetti particles to prevent memory issues", async () => {

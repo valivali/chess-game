@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { render, screen } from "@testing-library/react"
 
 import ChessBoard from "./ChessBoard"
-import { PIECE_COLOR, type Position } from "./ChessBoard.types.ts"
+import { PIECE_COLOR, type Position } from "./ChessBoard.types"
 
 jest.mock("../../utils/board", () => ({
   createInitialBoard: jest.fn(() =>

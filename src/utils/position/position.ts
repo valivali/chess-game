@@ -1,4 +1,4 @@
-import type { Position } from "../../components/ChessBoard/ChessBoard.types.ts"
+import type { Position } from "../../components/ChessBoard/ChessBoard.types"
 
 export const createPosition = (x: number, y: number): Position => ({ x, y })
 

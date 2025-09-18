@@ -1,16 +1,19 @@
+import type React from "react"
+
+import { Bishop as BishopSVG } from "../../assets/pieces"
 import { canMoveTo, executeDefaultMove, getSlidingMoves } from "../../utils/piece"
 import type { ChessBoard, PieceColor, PieceType, Position } from "../ChessBoard/ChessBoard.types"
 import { PIECE_TYPE, PIECE_WEIGHTS } from "../ChessBoard/ChessBoard.types"
 import type { IChessPiece, MoveContext, MoveResult } from "./pieces.types"
 
-const ROOK_DIRECTIONS = [
-  [0, 1],
-  [0, -1],
-  [1, 0],
-  [-1, 0]
+const BISHOP_DIRECTIONS = [
+  [1, 1],
+  [1, -1],
+  [-1, 1],
+  [-1, -1]
 ] as const
 
-export class Rook implements IChessPiece {
+export class Bishop implements IChessPiece {
   public readonly color: PieceColor
 
   constructor(color: PieceColor) {
@@ -18,19 +21,19 @@ export class Rook implements IChessPiece {
   }
 
   get type(): PieceType {
-    return PIECE_TYPE.ROOK
+    return PIECE_TYPE.BISHOP
   }
 
   get weight(): number {
-    return PIECE_WEIGHTS[PIECE_TYPE.ROOK]
+    return PIECE_WEIGHTS[PIECE_TYPE.BISHOP]
   }
 
   getValidMoves(position: Position, board: ChessBoard, _context?: MoveContext): Position[] {
-    return getSlidingMoves(position, ROOK_DIRECTIONS, board, this.color)
+    return getSlidingMoves(position, BISHOP_DIRECTIONS, board, this.color)
   }
 
-  executeMove(from: Position, to: Position, board: ChessBoard, context?: MoveContext): MoveResult {
-    return executeDefaultMove(this, from, to, board, context)
+  executeMove(from: Position, to: Position, board: ChessBoard, _context?: MoveContext): MoveResult {
+    return executeDefaultMove(this, from, to, board)
   }
 
   canMoveTo(from: Position, to: Position, board: ChessBoard, context?: MoveContext): boolean {
@@ -38,6 +41,10 @@ export class Rook implements IChessPiece {
   }
 
   clone(): IChessPiece {
-    return new Rook(this.color)
+    return new Bishop(this.color)
+  }
+
+  render(className: string = ""): React.ReactElement {
+    return <BishopSVG color={this.color} className={`chess-piece-svg ${className}`} />
   }
 }

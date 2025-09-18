@@ -3,7 +3,7 @@ import "./ChessSquare.scss"
 import React, { memo, useCallback } from "react"
 
 import type { Position } from "../ChessBoard/ChessBoard.types.ts"
-import ChessPiece from "../ChessBoard/ChessPiece"
+import { ChessPiece } from "../ui/chess-piece"
 import type { ChessSquareProps } from "./ChessSquare.types.ts"
 
 const CORNER_CLASSES = {

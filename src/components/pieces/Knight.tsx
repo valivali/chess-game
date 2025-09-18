@@ -1,3 +1,6 @@
+import type React from "react"
+
+import { Knight as KnightSVG } from "../../assets/pieces"
 import { canMoveTo, executeDefaultMove, getJumpingMoves } from "../../utils/piece"
 import type { ChessBoard, PieceColor, PieceType, Position } from "../ChessBoard/ChessBoard.types"
 import { PIECE_TYPE, PIECE_WEIGHTS } from "../ChessBoard/ChessBoard.types"
@@ -33,8 +36,8 @@ export class Knight implements IChessPiece {
     return getJumpingMoves(position, KNIGHT_MOVES, board, this.color)
   }
 
-  executeMove(from: Position, to: Position, board: ChessBoard, context?: MoveContext): MoveResult {
-    return executeDefaultMove(this, from, to, board, context)
+  executeMove(from: Position, to: Position, board: ChessBoard, _context?: MoveContext): MoveResult {
+    return executeDefaultMove(this, from, to, board)
   }
 
   canMoveTo(from: Position, to: Position, board: ChessBoard, context?: MoveContext): boolean {
@@ -43,5 +46,9 @@ export class Knight implements IChessPiece {
 
   clone(): IChessPiece {
     return new Knight(this.color)
+  }
+
+  render(className: string = ""): React.ReactElement {
+    return <KnightSVG color={this.color} className={`chess-piece-svg ${className}`} />
   }
 }

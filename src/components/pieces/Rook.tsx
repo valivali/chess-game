@@ -1,16 +1,19 @@
+import type React from "react"
+
+import { Rook as RookSVG } from "../../assets/pieces"
 import { canMoveTo, executeDefaultMove, getSlidingMoves } from "../../utils/piece"
 import type { ChessBoard, PieceColor, PieceType, Position } from "../ChessBoard/ChessBoard.types"
 import { PIECE_TYPE, PIECE_WEIGHTS } from "../ChessBoard/ChessBoard.types"
 import type { IChessPiece, MoveContext, MoveResult } from "./pieces.types"
 
-const BISHOP_DIRECTIONS = [
-  [1, 1],
-  [1, -1],
-  [-1, 1],
-  [-1, -1]
+const ROOK_DIRECTIONS = [
+  [0, 1],
+  [0, -1],
+  [1, 0],
+  [-1, 0]
 ] as const
 
-export class Bishop implements IChessPiece {
+export class Rook implements IChessPiece {
   public readonly color: PieceColor
 
   constructor(color: PieceColor) {
@@ -18,19 +21,19 @@ export class Bishop implements IChessPiece {
   }
 
   get type(): PieceType {
-    return PIECE_TYPE.BISHOP
+    return PIECE_TYPE.ROOK
   }
 
   get weight(): number {
-    return PIECE_WEIGHTS[PIECE_TYPE.BISHOP]
+    return PIECE_WEIGHTS[PIECE_TYPE.ROOK]
   }
 
   getValidMoves(position: Position, board: ChessBoard, _context?: MoveContext): Position[] {
-    return getSlidingMoves(position, BISHOP_DIRECTIONS, board, this.color)
+    return getSlidingMoves(position, ROOK_DIRECTIONS, board, this.color)
   }
 
-  executeMove(from: Position, to: Position, board: ChessBoard, context?: MoveContext): MoveResult {
-    return executeDefaultMove(this, from, to, board, context)
+  executeMove(from: Position, to: Position, board: ChessBoard, _context?: MoveContext): MoveResult {
+    return executeDefaultMove(this, from, to, board)
   }
 
   canMoveTo(from: Position, to: Position, board: ChessBoard, context?: MoveContext): boolean {
@@ -38,6 +41,10 @@ export class Bishop implements IChessPiece {
   }
 
   clone(): IChessPiece {
-    return new Bishop(this.color)
+    return new Rook(this.color)
+  }
+
+  render(className: string = ""): React.ReactElement {
+    return <RookSVG color={this.color} className={`chess-piece-svg ${className}`} />
   }
 }

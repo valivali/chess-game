@@ -1,3 +1,6 @@
+import type React from "react"
+
+import { King as KingSVG } from "../../assets/pieces"
 import { canMoveTo, getJumpingMoves } from "../../utils/piece"
 import type { ChessBoard, PieceColor, PieceType, Position } from "../ChessBoard/ChessBoard.types"
 import { CASTLING_SIDE, PIECE_COLOR, PIECE_TYPE, PIECE_WEIGHTS } from "../ChessBoard/ChessBoard.types"
@@ -40,7 +43,7 @@ export class King implements IChessPiece {
     return regularMoves
   }
 
-  executeMove(from: Position, to: Position, board: ChessBoard, context?: MoveContext): MoveResult {
+  executeMove(from: Position, to: Position, board: ChessBoard, _context?: MoveContext): MoveResult {
     const isCastling = this.isCastlingMove(from, to)
 
     if (isCastling) {
@@ -77,6 +80,10 @@ export class King implements IChessPiece {
 
   clone(): IChessPiece {
     return new King(this.color)
+  }
+
+  render(className: string = ""): React.ReactElement {
+    return <KingSVG color={this.color} className={`chess-piece-svg ${className}`} />
   }
 
   private isCastlingMove(from: Position, to: Position): boolean {

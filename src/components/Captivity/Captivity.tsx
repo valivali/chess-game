@@ -1,7 +1,7 @@
 import "./Captivity.scss"
 
-import ChessPieceComponent from "../ChessBoard/ChessPiece"
 import type { IChessPiece } from "../pieces"
+import { ChessPiece as ChessPieceComponent } from "../ui/chess-piece"
 
 export interface CaptivityProps {
   capturedPieces: IChessPiece[]

@@ -2,7 +2,7 @@ import type { ChessBoard, PieceColor, Position } from "../../components/ChessBoa
 import type { IChessPiece, MoveContext, MoveResult } from "../../components/pieces/pieces.types"
 import { isValidPosition } from "../position"
 
-export function executeDefaultMove(piece: IChessPiece, from: Position, to: Position, board: ChessBoard, context?: MoveContext): MoveResult {
+export function executeDefaultMove(piece: IChessPiece, from: Position, to: Position, board: ChessBoard): MoveResult {
   const capturedPiece = board[to.x][to.y]
   board[to.x][to.y] = piece
   board[from.x][from.y] = null

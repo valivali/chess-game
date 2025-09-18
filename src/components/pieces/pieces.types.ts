@@ -1,3 +1,5 @@
+import type React from "react"
+
 import type { CastlingRights, ChessBoard, PieceColor, PieceType, Position } from "../ChessBoard/ChessBoard.types"
 
 export interface MoveContext {
@@ -22,4 +24,6 @@ export interface IChessPiece {
   canMoveTo(from: Position, to: Position, board: ChessBoard, context?: MoveContext): boolean
 
   clone(): IChessPiece
+
+  render(className?: string): React.ReactElement
 }

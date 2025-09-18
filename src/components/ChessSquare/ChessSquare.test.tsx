@@ -7,11 +7,11 @@ import { PieceFactory } from "../pieces"
 import ChessSquare from "./ChessSquare"
 
 // Mock the ChessPiece component
-jest.mock("../ChessBoard/ChessPiece", () => {
-  return function MockChessPiece({ piece }: { piece: ChessPiece }) {
+jest.mock("../ui/chess-piece", () => ({
+  ChessPiece: function MockChessPiece({ piece }: { piece: ChessPiece }) {
     return <div data-testid={`piece-${piece.type}-${piece.color}`}>{piece.type}</div>
   }
-})
+}))
 
 describe("ChessSquare", () => {
   const mockPosition: Position = { x: 3, y: 4 }

@@ -1,3 +1,6 @@
+import type React from "react"
+
+import { Pawn as PawnSVG } from "../../assets/pieces"
 import { createPromotedQueen, isEnPassantCapture, isPawnPromotion } from "../../utils/moves"
 import { canMoveTo } from "../../utils/piece"
 import { isValidPosition } from "../../utils/position"
@@ -109,5 +112,9 @@ export class Pawn implements IChessPiece {
 
   clone(): IChessPiece {
     return new Pawn(this.color)
+  }
+
+  render(className: string = ""): React.ReactElement {
+    return <PawnSVG color={this.color} className={`chess-piece-svg ${className}`} />
   }
 }

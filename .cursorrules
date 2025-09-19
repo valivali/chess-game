@@ -268,6 +268,114 @@ describe("PieceFactory", () => {
 }
 ```
 
+## 🔧 Backend-Specific Standards
+
+### Service Layer Architecture
+
+These rules apply specifically to backend service classes to ensure consistent dependency injection and clear separation of concerns:
+
+- **Interface definition** - Every service class must have an interface defined in the same file and used everywhere possible
+- **Constructor injection** - All dependencies must be injected via the constructor and marked as `private readonly`
+- **Static builder pattern** - Each service should have a static `build()` method for dependency instantiation
+- **Builder placement** - The static `build()` method must always be the last function in the class
+- **Method organization** - Always place all private functions below all interface and public functions in service classes
+
+### ✅ Good Example:
+
+```typescript
+// ✅ Backend service with proper structure
+interface IGameService {
+  createGame(): Promise<Game>
+  getGame(id: string): Promise<Game | null>
+  updateGame(id: string, updates: Partial<Game>): Promise<Game>
+}
+
+export class GameService implements IGameService {
+  constructor(
+    private readonly gameRepository: IGameRepository,
+    private readonly idGenerator: IIdGenerator,
+    private readonly logger: ILogger
+  ) {}
+
+  // Public interface methods
+  async createGame(): Promise<Game> {
+    const id = this.generateGameId()
+    const game = this.createInitialGameState(id)
+    return await this.gameRepository.save(game)
+  }
+
+  async getGame(id: string): Promise<Game | null> {
+    return await this.gameRepository.findById(id)
+  }
+
+  async updateGame(id: string, updates: Partial<Game>): Promise<Game> {
+    const game = await this.getGame(id)
+    if (!game) {
+      throw new Error(`Game with id ${id} not found`)
+    }
+
+    const updatedGame = { ...game, ...updates }
+    return await this.gameRepository.save(updatedGame)
+  }
+
+  // Private methods below public methods
+  private generateGameId(): string {
+    return this.idGenerator.generate()
+  }
+
+  private createInitialGameState(id: string): Game {
+    return {
+      id,
+      status: "active",
+      board: this.createInitialBoard(),
+      currentPlayer: "white"
+    }
+  }
+
+  private createInitialBoard(): ChessBoard {
+    // Implementation details
+  }
+
+  // Static build method - always last
+  static build(): GameService {
+    return new GameService(GameRepository.build(), IdGenerator.build(), Logger.build())
+  }
+}
+
+// ❌ Bad example - no interface, no dependency injection
+export class GameService {
+  async createGame(): Promise<Game> {
+    const gameRepository = new GameRepository() // Direct instantiation
+    const id = Math.random().toString() // No abstraction
+    // ...
+  }
+}
+```
+
+### Dependency Usage
+
+- **Use interfaces everywhere** - Controllers, other services, and tests should depend on the interface, not the concrete class
+- **Consistent naming** - Interface names should start with `I` (e.g., `IGameService`)
+- **Builder chaining** - Use the static `build()` methods to create service instances with their dependencies
+
+### ✅ Controller Integration Example:
+
+```typescript
+// ✅ Controller uses interface
+export class GameController {
+  constructor(private readonly gameService: IGameService) {}
+
+  async createGame(req: Request, res: Response): Promise<void> {
+    const game = await this.gameService.createGame()
+    res.json(game)
+  }
+
+  static build(): GameController {
+    return new GameController(GameService.build())
+  }
+}
+```
+
 ---
 
 _These rules help maintain high code quality and consistency across the Chess Game project. When in doubt, prioritize readability and maintainability._

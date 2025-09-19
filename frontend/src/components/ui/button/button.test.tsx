@@ -1,6 +1,7 @@
+import "@testing-library/jest-dom"
+
 import { describe, expect, it, jest } from "@jest/globals"
 import { fireEvent, render, screen } from "@testing-library/react"
-import "@testing-library/jest-dom"
 import type { Ref } from "react"
 
 import { Button } from "./button"

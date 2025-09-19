@@ -1,12 +1,273 @@
-# Global coding principles
-- Always follow the SOLID principles:
-  - Single Responsibility: Each class/module must have only one responsibility.
-  - Open/Closed: Code should be open for extension but closed for modification.
-  - Liskov Substitution: Subtypes must be substitutable for their base types.
-  - Interface Segregation: Prefer small, specific interfaces over large, general ones.
-  - Dependency Inversion: Depend on abstractions, not concrete implementations.
+# Chess Game Coding Standards
 
-# Code style
-- Use meaningful, descriptive names for functions and variables.
-- Add comments only when code intent is not self-explanatory.
-- Write unit tests when creating new classes or functions.
+This file defines coding standards and best practices for the Chess Game project. These rules help maintain code quality, consistency, and readability across the entire codebase.
+
+## 🏗️ SOLID Principles
+
+Always follow the SOLID principles:
+
+- **Single Responsibility**: Each class/module must have only one responsibility
+- **Open/Closed**: Code should be open for extension but closed for modification
+- **Liskov Substitution**: Subtypes must be substitutable for their base types
+- **Interface Segregation**: Prefer small, specific interfaces over large, general ones
+- **Dependency Inversion**: Depend on abstractions, not concrete implementations
+
+## 🧩 Composition Over Inheritance
+
+- **Prefer composition over inheritance** - Use interfaces and composition to build flexible, maintainable code
+- **Use interfaces for contracts** - Define behavior through interfaces rather than class hierarchies
+- **Favor delegation** - Compose objects with specific behaviors rather than inheriting from base classes
+
+### ✅ Good Example:
+
+```typescript
+// ✅ Composition - pieces implement interface, use utility functions
+export class Queen implements IChessPiece {
+  constructor(private readonly color: PieceColor) {}
+
+  getValidMoves(position: Position, board: ChessBoard): Position[] {
+    return getSlidingMoves(position, QUEEN_DIRECTIONS, board, this.color)
+  }
+
+  executeMove(from: Position, to: Position, board: ChessBoard): MoveResult {
+    return executeDefaultMove(this, from, to, board) // Delegated behavior
+  }
+}
+
+// ❌ Inheritance hierarchy would be harder to maintain
+abstract class ChessPiece {
+  abstract getValidMoves(): Position[]
+  // Shared logic that may not apply to all pieces
+}
+```
+
+### ✅ SOLID Example:
+
+```typescript
+// Single responsibility - only handles piece creation
+export class PieceFactory {
+  static createPiece(type: PieceType, color: PieceColor): IChessPiece {
+    return match(type)
+      .with(PIECE_TYPE.PAWN, () => new Pawn(color))
+      .with(PIECE_TYPE.ROOK, () => new Rook(color))
+      .exhaustive()
+  }
+}
+
+// Interface segregation - specific interface
+interface GameStateActions {
+  resetGame: () => void
+  switchPlayer: () => void
+}
+```
+
+## 🎯 TypeScript Best Practices
+
+### Type Safety
+
+- **Never use `any`** - Always use proper typing. If unsure, create a specific interface or use `unknown`
+- **No nested types** - Create new types for each level of complexity
+- **Avoid inline objects** - Use existing interfaces/types or create new ones locally
+
+### ✅ Good Example:
+
+```typescript
+// ✅ Proper typing with interfaces
+interface MoveValidationParams {
+  piece: IChessPiece
+  from: Position
+  to: Position
+  board: ChessBoard
+}
+
+const validateMove = (params: MoveValidationParams): boolean => {
+  // Implementation
+}
+
+// ❌ Avoid inline objects
+const validateMove = (piece: IChessPiece, from: { x: number; y: number }, to: { x: number; y: number }) => {
+  // Don't do this
+}
+```
+
+## 🔄 Control Flow
+
+### Pattern Matching
+
+- **Use ts-pattern** for conditionals with `match...with` syntax
+- **Always add `.exhaustive()`** when all cases should be covered
+
+### ✅ Good Example:
+
+```typescript
+const getPieceValue = (piece: IChessPiece): number =>
+  match(piece.type)
+    .with(PIECE_TYPE.PAWN, () => 1)
+    .with(PIECE_TYPE.ROOK, () => 5)
+    .with(PIECE_TYPE.QUEEN, () => 9)
+    .exhaustive()
+```
+
+## 🧹 Clean Code Principles
+
+### Variable Usage
+
+- **Eliminate redundant variables** - Don't create variables unless they improve readability or are needed multiple times
+- **Prefer direct boolean checks** - Use conditions directly instead of storing boolean results
+- **Use `const` over `let`** - Always prefer `const` for immutable bindings. Only use `let` when reassignment is truly necessary
+
+### ✅ Good Example:
+
+```typescript
+// ✅ Direct usage
+if (isPositionEqual(kingPosition, targetPosition)) {
+  return true
+}
+
+// ❌ Redundant variable
+const positionsMatch = isPositionEqual(kingPosition, targetPosition)
+if (positionsMatch) {
+  return true
+}
+
+// ✅ Use const for immutable values
+const piece = board[position.x][position.y]
+const validMoves = getValidMoves(piece, position, board)
+
+// ✅ Use let only when reassignment is needed
+let currentPosition = startPosition
+for (const move of moves) {
+  currentPosition = applyMove(currentPosition, move)
+}
+
+// ❌ Unnecessary let usage
+let piece = board[position.x][position.y] // Should be const
+```
+
+### Comments
+
+- **Minimize comments** - Code should be self-explanatory
+- **Rewrite before commenting** - If code needs comments, first try to make it clearer
+- **Only comment complex behavior** that cannot be simplified
+
+### Function Design
+
+- **Use meaningful, descriptive names** for functions and variables
+- **Keep methods short** and easy to understand
+- **Single purpose** - each function should do one thing well
+
+## ⚡ Async Operations
+
+### Async Best Practices
+
+- **Only make methods async** if they perform actual asynchronous operations
+- **Use Promise.all** for parallel operations that don't depend on each other
+
+### ✅ Good Example:
+
+```typescript
+// ✅ Parallel execution
+const [gameState, playerStats, moveHistory] = await Promise.all([
+  fetchGameState(gameId),
+  fetchPlayerStats(playerId),
+  fetchMoveHistory(gameId)
+])
+
+// ❌ Sequential execution (slower)
+const gameState = await fetchGameState(gameId)
+const playerStats = await fetchPlayerStats(playerId)
+const moveHistory = await fetchMoveHistory(gameId)
+```
+
+## 🔍 Code Reuse
+
+- **Search for existing utilities** before implementing manual solutions
+- **Leverage existing libraries** and helper functions in the project
+- **Create reusable utilities** when patterns emerge
+
+## 🧪 Testing Standards
+
+### Test Structure
+
+- **Use factories** for creating test data when possible
+- **Follow Arrange-Act-Assert** pattern with blank lines between sections
+- **Write unit tests** for all new classes and functions
+- **One describe block** per function/method
+- **Call the tested object "subject"**
+
+### ✅ Good Example:
+
+```typescript
+describe("PieceFactory", () => {
+  describe("createPiece", () => {
+    it("should create a white pawn", () => {
+      // Arrange
+      const pieceType = PIECE_TYPE.PAWN
+      const color = PIECE_COLOR.WHITE
+
+      // Act
+      const subject = PieceFactory.createPiece(pieceType, color)
+
+      // Assert
+      expect(subject.type).toBe(PIECE_TYPE.PAWN)
+      expect(subject.color).toBe(PIECE_COLOR.WHITE)
+    })
+  })
+})
+```
+
+## 📁 File Organization
+
+- **Index files** should only export, not contain logic
+- **Co-locate related files** in feature directories
+- **Consistent naming** - use PascalCase for components, camelCase for utilities
+- **Type definitions** in separate `.types.ts` files when shared
+
+## 🎨 Code Style
+
+- **Consistent formatting** - rely on Prettier and ESLint
+- **Meaningful variable names** that explain intent
+- **Avoid abbreviations** unless they're well-known (e.g., `id`, `url`)
+- **Use const assertions** for readonly data (`as const`)
+
+## 🌈 CSS Color Management
+
+- **Use CSS custom properties for colors** - Add all colors to the `:root` variables in `src/index.scss`
+- **Never use hardcoded color values** - Always reference CSS variables for consistency and maintainability
+- **Follow naming convention** - Use `--color-[palette]-[shade]` format (e.g., `--color-emerald-500`)
+
+### ✅ Good Example:
+
+```scss
+// ✅ Add colors to :root in src/index.scss
+:root {
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-chess-light: #f0d9b5;
+  --color-chess-dark: #b58863;
+}
+
+// ✅ Use variables in component styles
+.chess-square {
+  background-color: var(--color-chess-light);
+  border: 1px solid var(--color-emerald-500);
+
+  &--dark {
+    background-color: var(--color-chess-dark);
+  }
+
+  &:hover {
+    border-color: var(--color-emerald-600);
+  }
+}
+
+// ❌ Hardcoded colors
+.chess-square {
+  background-color: #f0d9b5; // Should use CSS variable
+  border: 1px solid #10b981; // Should use CSS variable
+}
+```
+
+---
+
+_These rules help maintain high code quality and consistency across the Chess Game project. When in doubt, prioritize readability and maintainability._

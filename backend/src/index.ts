@@ -3,6 +3,7 @@ import cors from "cors"
 import helmet from "helmet"
 import morgan from "morgan"
 import dotenv from "dotenv"
+import mongoose from "mongoose"
 import { createServer } from "http"
 import { Server } from "socket.io"
 
@@ -12,6 +13,18 @@ import gameRoutes from "@/routes/gameRoutes"
 
 // Load environment variables
 dotenv.config()
+
+// MongoDB connection
+const connectToDatabase = async (): Promise<void> => {
+  try {
+    const mongoUri = process.env.MONGODB_URI || "mongodb://user:pass@localhost:27017/?authSource=admin"
+    await mongoose.connect(mongoUri)
+    console.log("✅ Connected to MongoDB")
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error)
+    process.exit(1)
+  }
+}
 
 const app = express()
 const server = createServer(app)
@@ -67,7 +80,16 @@ app.use(notFoundHandler)
 app.use(errorHandler)
 
 // Start server
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`)
-  console.log(`📊 Health check: http://localhost:${PORT}/health`)
+const startServer = async (): Promise<void> => {
+  await connectToDatabase()
+
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`)
+    console.log(`📊 Health check: http://localhost:${PORT}/health`)
+  })
+}
+
+startServer().catch((error) => {
+  console.error("❌ Failed to start server:", error)
+  process.exit(1)
 })

@@ -85,6 +85,7 @@ export const usePieceInteraction = ({
       if (selectedPiecePosition) {
         if (isValidMove(position)) {
           onMoveAttempt(selectedPiecePosition, position)
+          clearSelection()
           return
         }
 
@@ -133,11 +134,12 @@ export const usePieceInteraction = ({
 
       if (isValidMove(position)) {
         onMoveAttempt(draggedPiece.from, position)
+        clearSelection()
       }
 
       setDraggedPiece(null)
     },
-    [draggedPiece, isValidMove, onMoveAttempt]
+    [draggedPiece, isValidMove, onMoveAttempt, clearSelection]
   )
 
   const state: PieceInteractionState = {

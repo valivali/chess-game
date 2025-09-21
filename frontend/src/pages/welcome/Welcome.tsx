@@ -1,15 +1,49 @@
 import "./Welcome.scss"
 
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Input } from "../../components/ui/input"
+import { useGameContext } from "../../contexts"
+import { gameService } from "../../services/gameService"
 
 function Welcome() {
   const navigate = useNavigate()
+  const { setGameId } = useGameContext()
+  const [username, setUsername] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleStartGame = () => {
-    navigate("/game")
+  const isUsernameValid = username.length > 1
+  const isStartGameDisabled = !isUsernameValid || isLoading
+
+  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(event.target.value)
+    if (error) {
+      setError("")
+    }
+  }
+
+  const handleStartGame = async () => {
+    if (!isUsernameValid) {
+      return
+    }
+
+    setIsLoading(true)
+    setError("")
+
+    try {
+      const response = await gameService.createGame(username)
+      const gameId = response.data.game.id
+      setGameId(gameId)
+      navigate(`/game/${gameId}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create game")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -22,9 +56,27 @@ function Welcome() {
           </CardDescription>
         </CardHeader>
         <CardContent className="welcome__content">
-          <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button">
-            🎮 Start Game
-          </Button>
+          <div className="welcome__form">
+            <div className="welcome__input-group">
+              <label htmlFor="username" className="welcome__label">
+                Enter your username
+              </label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Your username..."
+                value={username}
+                onChange={handleUsernameChange}
+                className="welcome__input"
+                disabled={isLoading}
+                maxLength={50}
+              />
+              {error && <p className="welcome__error">{error}</p>}
+            </div>
+            <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button" disabled={isStartGameDisabled}>
+              {isLoading ? "Creating Game..." : "🎮 Start Game"}
+            </Button>
+          </div>
           <p className="welcome__subtitle">Play anytime, anywhere on any device</p>
         </CardContent>
       </Card>

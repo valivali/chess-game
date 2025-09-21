@@ -205,6 +205,44 @@ describe("usePieceInteraction", () => {
       expect(mockOnMoveAttempt).toHaveBeenCalledWith(mockPosition1, mockPosition2)
     })
 
+    it("should clear selection after successful move via click", () => {
+      const mockMoves = [mockPosition2]
+      mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
+      mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
+      mockBoard[mockPosition1.x][mockPosition1.y] = mockWhitePawn
+
+      const { result } = renderHook(() =>
+        usePieceInteraction({
+          ...defaultProps,
+          board: mockBoard,
+          onMoveAttempt: mockOnMoveAttempt
+        })
+      )
+
+      // Select a piece first
+      act(() => {
+        const [, actions] = result.current
+        actions.selectPiece(mockPosition1, mockWhitePawn)
+      })
+
+      // Verify piece is selected and has valid moves
+      let [state] = result.current
+      expect(state.selectedPiecePosition).toEqual(mockPosition1)
+      expect(state.validMoves).toEqual(mockMoves)
+
+      // Make a valid move by clicking
+      act(() => {
+        const [, actions] = result.current
+        actions.handleSquareClick(mockPosition2)
+      })
+
+      // Verify selection is cleared after the move
+      const [finalState] = result.current
+      expect(finalState.selectedPiecePosition).toBeNull()
+      expect(finalState.validMoves).toEqual([])
+      expect(mockOnMoveAttempt).toHaveBeenCalledWith(mockPosition1, mockPosition2)
+    })
+
     it("should deselect piece when clicking on same selected piece", () => {
       const mockMoves = [mockPosition2]
       mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
@@ -418,6 +456,45 @@ describe("usePieceInteraction", () => {
 
       const [state] = result.current
       expect(state.draggedPiece).toBeNull()
+    })
+
+    it("should clear selection after successful move via drag and drop", () => {
+      // Set up mocks for valid move
+      const mockMoves = [mockPosition2]
+      mockMovesUtils.getLegalMoves.mockReturnValue(mockMoves)
+      mockPositionUtils.isPositionEqual.mockImplementation((pos1, pos2) => pos1.x === pos2.x && pos1.y === pos2.y)
+
+      const { result } = renderHook(() =>
+        usePieceInteraction({
+          ...defaultProps,
+          onMoveAttempt: mockOnMoveAttempt
+        })
+      )
+
+      // Start dragging a piece (this also selects it)
+      act(() => {
+        const [, actions] = result.current
+        actions.handleDragStart(mockDragEvent, mockWhitePawn, mockPosition1)
+      })
+
+      // Verify piece is selected and has valid moves after drag start
+      let [state] = result.current
+      expect(state.selectedPiecePosition).toEqual(mockPosition1)
+      expect(state.validMoves).toEqual(mockMoves)
+      expect(state.draggedPiece).toEqual({ piece: mockWhitePawn, from: mockPosition1 })
+
+      // Drop on valid position
+      act(() => {
+        const [, currentActions] = result.current
+        currentActions.handleDrop(mockDragEvent, mockPosition2)
+      })
+
+      // Verify selection is cleared after the move
+      const [finalState] = result.current
+      expect(finalState.selectedPiecePosition).toBeNull()
+      expect(finalState.validMoves).toEqual([])
+      expect(finalState.draggedPiece).toBeNull()
+      expect(mockOnMoveAttempt).toHaveBeenCalledWith(mockPosition1, mockPosition2)
     })
 
     it("should handle drop on invalid position without making move", () => {

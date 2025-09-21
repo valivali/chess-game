@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { BrowserRouter } from "react-router-dom"
 
+import { GameProvider } from "../../contexts"
 import Welcome from "./Welcome"
 
 // Mock react-router-dom
@@ -11,10 +13,20 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate
 }))
 
+// Mock gameService
+jest.mock("../../services/gameService", () => ({
+  gameService: {
+    createGame: jest.fn()
+  }
+}))
+
+// Get the mocked function for type safety
+const mockCreateGame = jest.mocked(require("../../services/gameService").gameService.createGame)
+
 // Mock UI components
 jest.mock("../../components/ui/button", () => ({
-  Button: ({ children, onClick, variant, size, className }: any) => (
-    <button onClick={onClick} className={`button ${variant} ${size} ${className}`}>
+  Button: ({ children, onClick, variant, size, className, disabled }: any) => (
+    <button onClick={onClick} className={`button ${variant} ${size} ${className}`} disabled={disabled}>
       {children}
     </button>
   )
@@ -28,15 +40,45 @@ jest.mock("../../components/ui/card", () => ({
   CardTitle: ({ children, className }: any) => <h2 className={`card-title ${className}`}>{children}</h2>
 }))
 
+jest.mock("../../components/ui/input", () => ({
+  Input: ({ placeholder, value, onChange, disabled, maxLength, className }: any) => (
+    <input
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      maxLength={maxLength}
+      className={`input ${className}`}
+    />
+  )
+}))
+
 const WelcomeWithRouter = () => (
   <BrowserRouter>
-    <Welcome />
+    <GameProvider>
+      <Welcome />
+    </GameProvider>
   </BrowserRouter>
 )
 
 describe("Welcome Page", () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockCreateGame.mockResolvedValue({
+      success: true,
+      data: {
+        game: {
+          id: "test-game-id-123",
+          board: [],
+          currentPlayer: "white",
+          status: "active",
+          winner: null,
+          createdAt: "2023-01-01T00:00:00.000Z",
+          updatedAt: "2023-01-01T00:00:00.000Z"
+        }
+      },
+      message: "Game created successfully"
+    })
   })
 
   it("should render welcome page with correct content", () => {
@@ -46,6 +88,8 @@ describe("Welcome Page", () => {
     expect(screen.getByText(/Ready to play an exciting game of chess/)).toBeDefined()
     expect(screen.getByText("🎮 Start Game")).toBeDefined()
     expect(screen.getByText("Play anytime, anywhere on any device")).toBeDefined()
+    expect(screen.getByText("Enter your username")).toBeDefined()
+    expect(screen.getByPlaceholderText("Your username...")).toBeDefined()
   })
 
   it("should have proper structure with card components", () => {
@@ -59,66 +103,97 @@ describe("Welcome Page", () => {
     expect(document.querySelector(".card-content.welcome__content")).toBeDefined()
   })
 
-  it("should navigate to game page when start game button is clicked", () => {
+  it("should disable start game button when username is empty or too short", () => {
     render(<WelcomeWithRouter />)
 
-    const startGameButton = screen.getByText("🎮 Start Game")
-    fireEvent.click(startGameButton)
-
-    expect(mockNavigate).toHaveBeenCalledWith("/game")
-    expect(mockNavigate).toHaveBeenCalledTimes(1)
+    const startGameButton = screen.getByText("🎮 Start Game") as HTMLButtonElement
+    expect(startGameButton.disabled).toBe(true)
   })
 
-  it("should render start game button with correct properties", () => {
+  it("should enable start game button when username has more than 1 character", async () => {
+    const user = userEvent.setup()
     render(<WelcomeWithRouter />)
 
-    const startGameButton = screen.getByText("🎮 Start Game")
+    const usernameInput = screen.getByPlaceholderText("Your username...")
+    const startGameButton = screen.getByText("🎮 Start Game") as HTMLButtonElement
 
-    expect(startGameButton).toBeDefined()
-    expect(startGameButton.classList.contains("button")).toBe(true)
-    expect(startGameButton.classList.contains("gradient")).toBe(true)
-    expect(startGameButton.classList.contains("xl")).toBe(true)
-    expect(startGameButton.classList.contains("welcome__button")).toBe(true)
+    await user.type(usernameInput, "ab")
+
+    expect(startGameButton.disabled).toBe(false)
   })
 
-  it("should have proper container structure", () => {
+  it("should create game and navigate when start game button is clicked with valid username", async () => {
+    const user = userEvent.setup()
     render(<WelcomeWithRouter />)
 
-    expect(document.querySelector(".welcome__container")).toBeDefined()
-  })
-
-  it("should display encouraging description text", () => {
-    render(<WelcomeWithRouter />)
-
-    const description = screen.getByText(
-      /Ready to play an exciting game of chess\? Challenge yourself and improve your strategic thinking!/
-    )
-    expect(description).toBeDefined()
-  })
-
-  it("should display subtitle about device compatibility", () => {
-    render(<WelcomeWithRouter />)
-
-    const subtitle = screen.getByText("Play anytime, anywhere on any device")
-    expect(subtitle).toBeDefined()
-    expect(subtitle.classList.contains("welcome__subtitle")).toBe(true)
-  })
-
-  it("should handle multiple clicks on start game button", () => {
-    render(<WelcomeWithRouter />)
-
+    const usernameInput = screen.getByPlaceholderText("Your username...")
     const startGameButton = screen.getByText("🎮 Start Game")
 
-    fireEvent.click(startGameButton)
-    fireEvent.click(startGameButton)
+    await user.type(usernameInput, "TestUser")
     fireEvent.click(startGameButton)
 
-    expect(mockNavigate).toHaveBeenCalledTimes(3)
-    expect(mockNavigate).toHaveBeenCalledWith("/game")
+    await waitFor(() => {
+      expect(mockCreateGame).toHaveBeenCalledWith("TestUser")
+      expect(mockNavigate).toHaveBeenCalledWith("/game/test-game-id-123")
+    })
+  })
+
+  it("should show loading state when creating game", async () => {
+    const user = userEvent.setup()
+    mockCreateGame.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)))
+
+    render(<WelcomeWithRouter />)
+
+    const usernameInput = screen.getByPlaceholderText("Your username...")
+    const startGameButton = screen.getByText("🎮 Start Game")
+
+    await user.type(usernameInput, "TestUser")
+    fireEvent.click(startGameButton)
+
+    expect(screen.getByText("Creating Game...")).toBeDefined()
+  })
+
+  it("should display error message when game creation fails", async () => {
+    const user = userEvent.setup()
+    mockCreateGame.mockRejectedValue(new Error("Failed to create game"))
+
+    render(<WelcomeWithRouter />)
+
+    const usernameInput = screen.getByPlaceholderText("Your username...")
+    const startGameButton = screen.getByText("🎮 Start Game")
+
+    await user.type(usernameInput, "TestUser")
+    fireEvent.click(startGameButton)
+
+    await waitFor(() => {
+      expect(screen.getByText("Failed to create game")).toBeDefined()
+    })
+  })
+
+  it("should clear error when user starts typing", async () => {
+    const user = userEvent.setup()
+    mockCreateGame.mockRejectedValue(new Error("Failed to create game"))
+
+    render(<WelcomeWithRouter />)
+
+    const usernameInput = screen.getByPlaceholderText("Your username...")
+    const startGameButton = screen.getByText("🎮 Start Game")
+
+    // Trigger error
+    await user.type(usernameInput, "TestUser")
+    fireEvent.click(startGameButton)
+    await waitFor(() => {
+      expect(screen.getByText("Failed to create game")).toBeDefined()
+    })
+
+    // Clear error by typing
+    await user.clear(usernameInput)
+    await user.type(usernameInput, "NewUser")
+
+    expect(screen.queryByText("Failed to create game")).toBeNull()
   })
 
   it("should render without router context errors", () => {
-    // This test ensures the component properly uses useNavigate hook
     expect(() => render(<WelcomeWithRouter />)).not.toThrow()
   })
 
@@ -129,10 +204,11 @@ describe("Welcome Page", () => {
     expect(title.textContent).toBe("Welcome to Chess Game")
   })
 
-  it("should have clickable start game button", () => {
+  it("should have username input with proper attributes", () => {
     render(<WelcomeWithRouter />)
 
-    const startGameButton = screen.getByRole("button")
-    expect(startGameButton).toBeDefined()
+    const usernameInput = screen.getByPlaceholderText("Your username...")
+    expect(usernameInput.getAttribute("maxLength")).toBe("50")
+    expect(usernameInput.classList.contains("input")).toBe(true)
   })
 })

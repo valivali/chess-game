@@ -1,15 +1,34 @@
 import "./Game.scss"
 
-import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 
 import { ChessBoard } from "../../components/ChessBoard"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
+import { useGameContext } from "../../contexts"
 
 function Game() {
   const navigate = useNavigate()
+  const { gameId: urlGameId } = useParams<{ gameId?: string }>()
+  const { gameId: contextGameId, setGameId, clearGameId } = useGameContext()
+
+  useEffect(() => {
+    if (!contextGameId && urlGameId) {
+      setGameId(urlGameId)
+    }
+  }, [contextGameId, urlGameId, setGameId])
+
+  const gameId = contextGameId || urlGameId
+
+  useEffect(() => {
+    if (!gameId) {
+      navigate("/")
+    }
+  }, [gameId, navigate])
 
   const handleBackToWelcome = () => {
+    clearGameId()
     navigate("/")
   }
 
@@ -20,7 +39,7 @@ function Game() {
           <span className="game__back-arrow">←</span>
           <span className="game__back-text">Back to Welcome</span>
         </Button>
-        <h1 className="game__title">♟️ Chess Game</h1>
+        <h1 className="game__title">♟️ Chess Game {gameId && `(${gameId.slice(0, 8)}...)`}</h1>
         <div className="game__spacer"></div>
       </div>
 

@@ -1,4 +1,5 @@
 import { Game, GameStatusInfo, PIECE_COLOR, GAME_STATUS, PIECE_TYPE, PieceType } from "@/types/gameTypes"
+import { IGameDao, GameDao } from "@/dao/GameDao"
 import { v4 as uuidv4 } from "uuid"
 
 interface IdGeneratorInterface {
@@ -25,17 +26,15 @@ class IdGenerator implements IdGeneratorInterface {
 }
 
 export class GameService implements GameServiceInterface {
-  private games: Map<string, Game> = new Map()
-
-  constructor(private readonly idGenerator: IdGeneratorInterface) {}
+  constructor(
+    private readonly gameDao: IGameDao,
+    private readonly idGenerator: IdGeneratorInterface
+  ) {}
 
   async createGame(playerName?: string): Promise<Game> {
-    const gameId = this.idGenerator.generateId()
-
     const board = this.initializeChessBoard()
 
-    const game: Game = {
-      id: gameId,
+    const gameData = {
       board,
       currentPlayer: PIECE_COLOR.WHITE,
       status: GAME_STATUS.ACTIVE,
@@ -44,46 +43,56 @@ export class GameService implements GameServiceInterface {
       updatedAt: new Date()
     }
 
-    this.games.set(gameId, game)
-
-    return game
+    return await this.gameDao.create(gameData)
   }
 
   async getGame(gameId: string): Promise<Game | null> {
-    return this.games.get(gameId) || null
+    return await this.gameDao.findById(gameId)
   }
 
   async updateGame(game: Game): Promise<Game> {
-    this.games.set(game.id, game)
-    return game
-  }
+    const updatedGame = await this.gameDao.update(game.id, {
+      board: game.board,
+      currentPlayer: game.currentPlayer,
+      status: game.status,
+      winner: game.winner,
+      updatedAt: new Date()
+    })
 
-  async resetGame(gameId: string): Promise<Game> {
-    const existingGame = this.games.get(gameId)
-    if (!existingGame) {
+    if (!updatedGame) {
       throw new Error("Game not found")
     }
 
-    const game: Game = {
-      ...existingGame,
-      board: this.initializeChessBoard(),
+    return updatedGame
+  }
+
+  async resetGame(gameId: string): Promise<Game> {
+    const board = this.initializeChessBoard()
+
+    const updatedGame = await this.gameDao.update(gameId, {
+      board,
       currentPlayer: PIECE_COLOR.WHITE,
       status: GAME_STATUS.ACTIVE,
       winner: null,
       updatedAt: new Date()
+    })
+
+    if (!updatedGame) {
+      throw new Error("Game not found")
     }
 
-    this.games.set(gameId, game)
-
-    return game
+    return updatedGame
   }
 
   async deleteGame(gameId: string): Promise<void> {
-    this.games.delete(gameId)
+    const deleted = await this.gameDao.delete(gameId)
+    if (!deleted) {
+      throw new Error("Game not found")
+    }
   }
 
   async getGameStatus(gameId: string): Promise<GameStatusInfo | null> {
-    const game = this.games.get(gameId)
+    const game = await this.gameDao.findById(gameId)
     if (!game) {
       return null
     }
@@ -133,6 +142,6 @@ export class GameService implements GameServiceInterface {
   }
 
   static build(): GameService {
-    return new GameService(IdGenerator.build())
+    return new GameService(GameDao.build(), IdGenerator.build())
   }
 }

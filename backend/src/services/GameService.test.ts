@@ -1,5 +1,5 @@
 import { GameService } from "./GameService"
-import { IGameDao } from "@/dao/GameDao"
+import { GameDaoInterface } from "@/dao/gameDao.interface"
 import { PIECE_COLOR, GAME_STATUS } from "@/types/gameTypes"
 
 // Mock uuid module
@@ -8,7 +8,7 @@ jest.mock("uuid", () => ({
 }))
 
 // Mock dependencies
-const mockGameDao: jest.Mocked<IGameDao> = {
+const mockGameDao: jest.Mocked<GameDaoInterface> = {
   create: jest.fn(),
   findById: jest.fn(),
   update: jest.fn(),

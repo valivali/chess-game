@@ -1,11 +1,14 @@
-import { Game, MoveResult, MoveHistory, Position, Move, HistoricalMove, PIECE_COLOR, GAME_STATUS, PieceType } from "@/types/gameTypes"
-
-export interface MoveServiceInterface {
-  makeMove(game: Game, from: Position, to: Position, playerId: string): Promise<MoveResult>
-  getMoveHistory(gameId: string): Promise<MoveHistory | null>
-  recordMove(gameId: string, move: HistoricalMove): Promise<void>
-  clearMoveHistory(gameId: string): Promise<void>
-}
+import {
+  Game,
+  GAME_STATUS,
+  HistoricalMove,
+  Move,
+  MoveHistory,
+  MoveResult,
+  PIECE_COLOR,
+  Position
+} from '@/types/gameTypes'
+import { MoveServiceInterface } from './moveService.interface'
 
 export class MoveService implements MoveServiceInterface {
   private moveHistories: Map<string, MoveHistory> = new Map()
@@ -17,7 +20,7 @@ export class MoveService implements MoveServiceInterface {
       return {
         success: false,
         game,
-        error: "Game is not active"
+        error: 'Game is not active'
       }
     }
 
@@ -27,7 +30,7 @@ export class MoveService implements MoveServiceInterface {
       return {
         success: false,
         game,
-        error: "No piece at source position"
+        error: 'No piece at source position'
       }
     }
 
@@ -39,7 +42,8 @@ export class MoveService implements MoveServiceInterface {
     }
 
     // Switch players
-    game.currentPlayer = game.currentPlayer === PIECE_COLOR.WHITE ? PIECE_COLOR.BLACK : PIECE_COLOR.WHITE
+    game.currentPlayer =
+      game.currentPlayer === PIECE_COLOR.WHITE ? PIECE_COLOR.BLACK : PIECE_COLOR.WHITE
     game.updatedAt = new Date()
 
     // Record move in history

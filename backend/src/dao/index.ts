@@ -1,1 +1,2 @@
-export { GameDao, IGameDao } from "./GameDao"
+export { GameDao } from "./GameDao"
+export { GameDaoInterface } from "./gameDao.interface"

@@ -1,10 +1,11 @@
-import { Request, Response, NextFunction } from "express"
-import { GameService, GameServiceInterface } from "@/services/GameService"
-import { MoveService, MoveServiceInterface } from "@/services/MoveService"
-import { CreateGameRequest, MakeMoveRequest } from "@/types/gameTypes"
-import { ResponseFormatter } from "@/utils/responseFormatter"
-import { GameConverters } from "@/converters/gameConverters"
-import { CreateGameRequestDto, MakeMoveRequestDto, GameIdParamDto } from "@/validation/schemas"
+import { NextFunction, Request, Response } from 'express'
+import { GameService } from '@/services/GameService'
+import { GameServiceInterface } from '@/services/gameService.interface'
+import { MoveService } from '@/services/MoveService'
+import { MoveServiceInterface } from '@/services/moveService.interface'
+import { ResponseFormatter } from '@/utils/responseFormatter'
+import { GameConverters } from '@/converters/gameConverters'
+import { CreateGameRequestDto, GameIdParamDto, MakeMoveRequestDto } from '@/validation/schemas'
 
 export class GameController {
   constructor(
@@ -12,17 +13,24 @@ export class GameController {
     private readonly moveService: MoveServiceInterface
   ) {}
 
-  async createGame(req: Request<{}, {}, CreateGameRequestDto>, res: Response, next: NextFunction): Promise<void> {
+  async createGame(
+    req: Request<{}, {}, CreateGameRequestDto>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const { playerName } = req.body
       const sanitizedPlayerName = GameConverters.sanitizePlayerName(playerName)
 
-      const game = await this.gameService.createGame(sanitizedPlayerName)
+      // Get user ID from JWT token if authenticated
+      const userId = req.user?.userId
+
+      const game = await this.gameService.createGame(sanitizedPlayerName, userId)
 
       await this.moveService.clearMoveHistory(game.id)
 
       const gameDto = GameConverters.gameToDto(game)
-      ResponseFormatter.created(res, { game: gameDto }, "Game created successfully")
+      ResponseFormatter.created(res, { game: gameDto }, 'Game created successfully')
     } catch (error) {
       next(error)
     }
@@ -36,7 +44,7 @@ export class GameController {
       const game = await this.gameService.getGame(sanitizedGameId)
 
       if (!game) {
-        ResponseFormatter.notFound(res, "Game not found")
+        ResponseFormatter.notFound(res, 'Game not found')
         return
       }
 
@@ -47,7 +55,11 @@ export class GameController {
     }
   }
 
-  async makeMove(req: Request<GameIdParamDto, {}, MakeMoveRequestDto>, res: Response, next: NextFunction): Promise<void> {
+  async makeMove(
+    req: Request<GameIdParamDto, {}, MakeMoveRequestDto>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const { gameId } = req.params
       const { from, to, playerId } = req.body
@@ -56,7 +68,7 @@ export class GameController {
 
       const game = await this.gameService.getGame(sanitizedGameId)
       if (!game) {
-        ResponseFormatter.notFound(res, "Game not found")
+        ResponseFormatter.notFound(res, 'Game not found')
         return
       }
 
@@ -107,7 +119,11 @@ export class GameController {
     }
   }
 
-  async getGameStatus(req: Request<GameIdParamDto>, res: Response, next: NextFunction): Promise<void> {
+  async getGameStatus(
+    req: Request<GameIdParamDto>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const { gameId } = req.params
       const sanitizedGameId = GameConverters.sanitizeGameId(gameId)
@@ -115,7 +131,7 @@ export class GameController {
       const status = await this.gameService.getGameStatus(sanitizedGameId)
 
       if (!status) {
-        ResponseFormatter.notFound(res, "Game not found")
+        ResponseFormatter.notFound(res, 'Game not found')
         return
       }
 
@@ -126,7 +142,11 @@ export class GameController {
     }
   }
 
-  async getMoveHistory(req: Request<GameIdParamDto>, res: Response, next: NextFunction): Promise<void> {
+  async getMoveHistory(
+    req: Request<GameIdParamDto>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const { gameId } = req.params
       const sanitizedGameId = GameConverters.sanitizeGameId(gameId)
@@ -134,7 +154,7 @@ export class GameController {
       const history = await this.moveService.getMoveHistory(sanitizedGameId)
 
       if (!history) {
-        ResponseFormatter.notFound(res, "Move history not found")
+        ResponseFormatter.notFound(res, 'Move history not found')
         return
       }
 

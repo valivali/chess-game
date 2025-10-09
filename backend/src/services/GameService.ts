@@ -1,18 +1,11 @@
 import { Game, GameStatusInfo, PIECE_COLOR, GAME_STATUS, PIECE_TYPE, PieceType } from "@/types/gameTypes"
-import { IGameDao, GameDao } from "@/dao/GameDao"
+import { GameDao } from "@/dao/GameDao"
+import { GameDaoInterface } from "@/dao/gameDao.interface"
+import { GameServiceInterface } from "./gameService.interface"
 import { v4 as uuidv4 } from "uuid"
 
 interface IdGeneratorInterface {
   generateId(): string
-}
-
-export interface GameServiceInterface {
-  createGame(playerName?: string): Promise<Game>
-  getGame(gameId: string): Promise<Game | null>
-  updateGame(game: Game): Promise<Game>
-  resetGame(gameId: string): Promise<Game>
-  deleteGame(gameId: string): Promise<void>
-  getGameStatus(gameId: string): Promise<GameStatusInfo | null>
 }
 
 class IdGenerator implements IdGeneratorInterface {
@@ -27,20 +20,26 @@ class IdGenerator implements IdGeneratorInterface {
 
 export class GameService implements GameServiceInterface {
   constructor(
-    private readonly gameDao: IGameDao,
+    private readonly gameDao: GameDaoInterface,
     private readonly idGenerator: IdGeneratorInterface
   ) {}
 
-  async createGame(playerName?: string): Promise<Game> {
+  async createGame(playerName?: string, userId?: string): Promise<Game> {
     const board = this.initializeChessBoard()
 
-    const gameData = {
+    const gameData: any = {
       board,
       currentPlayer: PIECE_COLOR.WHITE,
       status: GAME_STATUS.ACTIVE,
       winner: null,
+      whitePlayerId: userId || this.idGenerator.generateId(), // Use userId if authenticated, otherwise generate guest ID
       createdAt: new Date(),
       updatedAt: new Date()
+    }
+
+    // Only add optional fields if they have values
+    if (playerName) {
+      gameData.playerName = playerName
     }
 
     return await this.gameDao.create(gameData)

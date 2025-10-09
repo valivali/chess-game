@@ -55,6 +55,7 @@ export default tseslint.config([
 
       // TypeScript specific
       "@typescript-eslint/ban-ts-comment": "off",
+      "no-undef": "off", // TypeScript handles this better
 
       // Unused imports and variables
       "no-unused-vars": "off",

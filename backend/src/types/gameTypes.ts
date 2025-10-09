@@ -33,6 +33,7 @@ export interface Position {
 
 export interface CreateGameRequest {
   playerName?: string
+  userId?: string // Optional for guest users
 }
 
 export interface MakeMoveRequest {
@@ -47,6 +48,9 @@ export interface Game {
   currentPlayer: PieceColor
   status: GameStatus
   winner: PieceColor | null
+  whitePlayerId?: string // User ID or guest identifier
+  blackPlayerId?: string // For multiplayer games
+  playerName?: string // For guest users
   createdAt: Date
   updatedAt: Date
 }

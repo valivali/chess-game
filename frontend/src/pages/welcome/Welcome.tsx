@@ -1,41 +1,34 @@
 import "./Welcome.scss"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
-import { useGameContext } from "../../contexts"
+import { useAuth, useGameContext } from "../../contexts"
 import { gameService } from "../../services/gameService"
+import GuestWelcome from "./GuestWelcome"
 
 function Welcome() {
   const navigate = useNavigate()
   const { setGameId } = useGameContext()
-  const [username, setUsername] = useState("")
+  const { isAuthenticated, user } = useAuth()
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const isUsernameValid = username.length > 1
-  const isStartGameDisabled = !isUsernameValid || isLoading
-
-  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value)
-    if (error) {
-      setError("")
-    }
+  // Show guest welcome for unauthenticated users
+  if (!isAuthenticated) {
+    return <GuestWelcome />
   }
 
   const handleStartGame = async () => {
-    if (!isUsernameValid) {
-      return
-    }
-
     setIsLoading(true)
     setError("")
 
     try {
-      const response = await gameService.createGame(username)
+      // For authenticated users, use their username from the user object
+      const response = await gameService.createGame(user?.username || "Player")
       const gameId = response.data.game.id
       setGameId(gameId)
       navigate(`/game/${gameId}`)
@@ -46,37 +39,25 @@ function Welcome() {
     }
   }
 
+  // Show main welcome screen for authenticated users
   return (
     <div className="welcome__container">
       <Card className="welcome__card">
         <CardHeader className="welcome__header">
-          <CardTitle className="welcome__title">Welcome to Chess Game</CardTitle>
+          <CardTitle className="welcome__title">Welcome back, {user?.username}!</CardTitle>
           <CardDescription className="welcome__description">
-            Ready to play an exciting game of chess? Challenge yourself and improve your strategic thinking!
+            Ready to continue your chess journey? Start a new game or challenge yourself!
           </CardDescription>
         </CardHeader>
         <CardContent className="welcome__content">
           <div className="welcome__form">
-            <div className="welcome__input-group">
-              <label htmlFor="username" className="welcome__label">
-                Enter your username
-              </label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Your username..."
-                value={username}
-                onChange={handleUsernameChange}
-                className="welcome__input"
-                disabled={isLoading}
-                maxLength={50}
-              />
-              {error && <p className="welcome__error">{error}</p>}
-            </div>
-            <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button" disabled={isStartGameDisabled}>
+            <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button" disabled={isLoading}>
               {isLoading ? "Creating Game..." : "🎮 Start Game"}
             </Button>
+
+            {error && <p className="welcome__error">{error}</p>}
           </div>
+
           <p className="welcome__subtitle">Play anytime, anywhere on any device</p>
         </CardContent>
       </Card>

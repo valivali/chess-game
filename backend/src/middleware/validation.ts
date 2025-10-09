@@ -85,3 +85,8 @@ export const validateQuery = <T>(schema: z.ZodSchema<T>) => {
     }
   }
 }
+
+/**
+ * Alias for validateBody - commonly used for request validation
+ */
+export const validateRequest = validateBody

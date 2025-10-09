@@ -9,7 +9,9 @@ import { Server } from "socket.io"
 
 import { errorHandler } from "@/middleware/errorHandler"
 import { notFoundHandler } from "@/middleware/notFoundHandler"
+import { generalLimiter } from "@/middleware/rateLimiter"
 import gameRoutes from "@/routes/gameRoutes"
+import authRoutes from "@/routes/authRoutes"
 
 // Load environment variables
 dotenv.config()
@@ -48,7 +50,11 @@ app.use(morgan("combined"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+// Apply general rate limiting to all API routes
+app.use("/api", generalLimiter)
+
 // Routes
+app.use("/api/auth", authRoutes)
 app.use("/api/game", gameRoutes)
 
 // Health check endpoint

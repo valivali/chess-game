@@ -38,7 +38,6 @@
 
   &__header {
     text-align: center;
-    padding-bottom: 1rem;
     padding: 1.5rem 1rem 1rem 1rem;
 
     @media (min-width: 640px) {
@@ -93,8 +92,8 @@
   &__form {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1.5rem;
-    width: 100%;
   }
 
   &__input-group {
@@ -102,6 +101,7 @@
     flex-direction: column;
     gap: 0.5rem;
     text-align: left;
+    width: 100%;
   }
 
   &__label {
@@ -146,6 +146,64 @@
 
     @media (min-width: 640px) {
       font-size: 0.875rem;
+    }
+  }
+
+  // Authentication-specific styles
+  &__divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background-color: var(--color-gray-300);
+    }
+
+    span {
+      padding: 0 1rem;
+      color: var(--color-gray-500);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+  }
+
+  &__auth-actions {
+    display: flex;
+    width: 100%;
+    max-width: 18rem;
+    margin: 0 auto;
+
+    @media (min-width: 640px) {
+      flex-direction: row;
+      max-width: 24rem;
+      gap: 1rem;
+    }
+  }
+
+  &__auth-button {
+    flex: 1;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+  }
+
+  &__auth-benefits {
+    font-size: 0.8rem;
+    color: var(--color-gray-600);
+    margin-top: 1rem;
+    line-height: 1.4;
+    padding: 0 1rem;
+
+    @media (min-width: 640px) {
+      font-size: 0.85rem;
     }
   }
 }

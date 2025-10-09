@@ -1,16 +1,15 @@
 import { Game } from "@/types/gameTypes"
 import { GameModel, GameDocument } from "@/models/GameModel"
+import { GameDaoInterface } from "./gameDao.interface"
 
-export interface IGameDao {
-  create(game: Omit<Game, "id">): Promise<Game>
-  findById(id: string): Promise<Game | null>
-  update(id: string, updates: Partial<Omit<Game, "id">>): Promise<Game | null>
-  delete(id: string): Promise<boolean>
-  findAll(): Promise<Game[]>
+type CreateGameData = Omit<Game, "id" | "whitePlayerId" | "blackPlayerId" | "playerName"> & {
+  whitePlayerId?: string
+  blackPlayerId?: string
+  playerName?: string
 }
 
-export class GameDao implements IGameDao {
-  async create(gameData: Omit<Game, "id">): Promise<Game> {
+export class GameDao implements GameDaoInterface {
+  async create(gameData: CreateGameData): Promise<Game> {
     const gameDocument = new GameModel(gameData)
     const savedGame = await gameDocument.save()
     return this.documentToGame(savedGame)

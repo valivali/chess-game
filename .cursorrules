@@ -270,11 +270,18 @@ describe("PieceFactory", () => {
 
 ## 🔧 Backend-Specific Standards
 
+### Interface Naming Conventions
+
+- **Backend interfaces** - Use `*Interface` naming pattern (e.g., `AuthServiceInterface`, `GameServiceInterface`)
+- **Frontend interfaces** - Use `I*` naming pattern (e.g., `IAuthService`, `IGameService`)
+- **Separate interface files** - Backend interfaces must be defined in separate `*.interface.ts` files (e.g., `authService.interface.ts`)
+- **Interface imports** - Always import interfaces from their dedicated interface files, not from service files
+
 ### Service Layer Architecture
 
 These rules apply specifically to backend service classes to ensure consistent dependency injection and clear separation of concerns:
 
-- **Interface definition** - Every service class must have an interface defined in the same file and used everywhere possible
+- **Interface definition** - Every service class must have an interface defined in a separate `*.interface.ts` file and used everywhere possible
 - **Constructor injection** - All dependencies must be injected via the constructor and marked as `private readonly`
 - **Static builder pattern** - Each service should have a static `build()` method for dependency instantiation
 - **Builder placement** - The static `build()` method must always be the last function in the class
@@ -284,17 +291,21 @@ These rules apply specifically to backend service classes to ensure consistent d
 
 ```typescript
 // ✅ Backend service with proper structure
-interface IGameService {
+// gameService.interface.ts
+export interface GameServiceInterface {
   createGame(): Promise<Game>
   getGame(id: string): Promise<Game | null>
   updateGame(id: string, updates: Partial<Game>): Promise<Game>
 }
 
-export class GameService implements IGameService {
+// GameService.ts
+import { GameServiceInterface } from "./gameService.interface"
+
+export class GameService implements GameServiceInterface {
   constructor(
-    private readonly gameRepository: IGameRepository,
-    private readonly idGenerator: IIdGenerator,
-    private readonly logger: ILogger
+    private readonly gameRepository: GameRepositoryInterface,
+    private readonly idGenerator: IdGeneratorInterface,
+    private readonly logger: LoggerInterface
   ) {}
 
   // Public interface methods
@@ -355,15 +366,17 @@ export class GameService {
 ### Dependency Usage
 
 - **Use interfaces everywhere** - Controllers, other services, and tests should depend on the interface, not the concrete class
-- **Consistent naming** - Interface names should start with `I` (e.g., `IGameService`)
+- **Consistent naming** - Backend interface names should end with `Interface` (e.g., `GameServiceInterface`)
 - **Builder chaining** - Use the static `build()` methods to create service instances with their dependencies
 
 ### ✅ Controller Integration Example:
 
 ```typescript
 // ✅ Controller uses interface
+import { GameServiceInterface } from "@/services/gameService.interface"
+
 export class GameController {
-  constructor(private readonly gameService: IGameService) {}
+  constructor(private readonly gameService: GameServiceInterface) {}
 
   async createGame(req: Request, res: Response): Promise<void> {
     const game = await this.gameService.createGame()

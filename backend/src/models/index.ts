@@ -1,3 +1,3 @@
-export { GameModel, GameDocument } from "./GameModel"
-export { UserModel, UserDocument } from "./UserModel"
-export { RefreshTokenModel, RefreshTokenDocument } from "./RefreshTokenModel"
+export { GameModel, GameDocument } from "./game"
+export { UserModel, UserDocument } from "./user"
+export { RefreshTokenModel, RefreshTokenDocument } from "./refresh-token"

@@ -7,11 +7,11 @@ import mongoose from "mongoose"
 import { createServer } from "http"
 import { Server } from "socket.io"
 
-import { errorHandler } from "@/middleware/errorHandler"
-import { notFoundHandler } from "@/middleware/notFoundHandler"
-import { generalLimiter } from "@/middleware/rateLimiter"
-import gameRoutes from "@/routes/gameRoutes"
-import authRoutes from "@/routes/authRoutes"
+import { errorHandler } from "@/middleware/error-handler"
+import { notFoundHandler } from "@/middleware/not-found-handler"
+import { generalLimiter } from "@/middleware/rate-limiter"
+import gameRoutes from "@/routes/game-routes"
+import authRoutes from "@/routes/auth-routes"
 
 // Load environment variables
 dotenv.config()

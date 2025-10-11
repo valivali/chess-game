@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
+import { InputWithError } from "../../components/ui/input"
 import { useAuth } from "../../contexts"
 import { type LoginFormData, loginSchema } from "./validation.schemas"
 
@@ -25,7 +25,7 @@ function Login({ onSwitchToRegister, onSwitchToGuest }: LoginProps) {
     clearErrors
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    mode: "onChange"
+    mode: "onBlur"
   })
 
   const onSubmit = async (data: LoginFormData) => {
@@ -57,13 +57,12 @@ function Login({ onSwitchToRegister, onSwitchToGuest }: LoginProps) {
       <CardContent className="auth__content">
         <form onSubmit={handleSubmit(onSubmit)} className="auth__form">
           <div className="auth__input-group">
-            <label htmlFor="email" className="auth__label">
-              Email Address
-            </label>
-            <Input
+            <InputWithError
               id="email"
               type="email"
+              label="Email Address"
               placeholder="Enter your email"
+              error={errors.email?.message}
               {...register("email", {
                 onChange: handleInputChange("email")
               })}
@@ -71,17 +70,15 @@ function Login({ onSwitchToRegister, onSwitchToGuest }: LoginProps) {
               disabled={isLoading}
               autoComplete="email"
             />
-            {errors.email && <p className="auth__error">{errors.email.message}</p>}
           </div>
 
           <div className="auth__input-group">
-            <label htmlFor="password" className="auth__label">
-              Password
-            </label>
-            <Input
+            <InputWithError
               id="password"
               type="password"
+              label="Password"
               placeholder="Enter your password"
+              error={errors.password?.message}
               {...register("password", {
                 onChange: handleInputChange("password")
               })}
@@ -89,7 +86,6 @@ function Login({ onSwitchToRegister, onSwitchToGuest }: LoginProps) {
               disabled={isLoading}
               autoComplete="current-password"
             />
-            {errors.password && <p className="auth__error">{errors.password.message}</p>}
           </div>
 
           {error && <div className="auth__error-banner">{error}</div>}

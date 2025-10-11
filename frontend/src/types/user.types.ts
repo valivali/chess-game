@@ -7,7 +7,6 @@ export interface User {
   updatedAt: string
 }
 
-// Future user stats interface for user page
 export interface UserStats {
   gamesPlayed: number
   gamesWon: number
@@ -19,7 +18,6 @@ export interface UserStats {
   averageGameDuration: number
 }
 
-// Future user profile interface for user page
 export interface UserProfile extends User {
   stats: UserStats
   preferences: UserPreferences

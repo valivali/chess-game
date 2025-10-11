@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
+import { InputWithError } from "../../components/ui/input"
 import { useAuth } from "../../contexts"
 import { type RegisterFormData, registerSchema } from "./validation.schemas"
 
@@ -25,7 +25,7 @@ function Register({ onSwitchToLogin, onSwitchToGuest }: RegisterProps) {
     clearErrors
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange"
+    mode: "onBlur"
   })
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -57,13 +57,12 @@ function Register({ onSwitchToLogin, onSwitchToGuest }: RegisterProps) {
       <CardContent className="auth__content">
         <form onSubmit={handleSubmit(onSubmit)} className="auth__form">
           <div className="auth__input-group">
-            <label htmlFor="email" className="auth__label">
-              Email Address
-            </label>
-            <Input
+            <InputWithError
               id="email"
               type="email"
+              label="Email Address"
               placeholder="Enter your email"
+              error={errors.email?.message}
               {...register("email", {
                 onChange: handleInputChange("email")
               })}
@@ -71,17 +70,15 @@ function Register({ onSwitchToLogin, onSwitchToGuest }: RegisterProps) {
               disabled={isLoading}
               autoComplete="email"
             />
-            {errors.email && <p className="auth__error">{errors.email.message}</p>}
           </div>
 
           <div className="auth__input-group">
-            <label htmlFor="username" className="auth__label">
-              Username
-            </label>
-            <Input
+            <InputWithError
               id="username"
               type="text"
+              label="Username"
               placeholder="Choose a username"
+              error={errors.username?.message}
               {...register("username", {
                 onChange: handleInputChange("username")
               })}
@@ -90,17 +87,15 @@ function Register({ onSwitchToLogin, onSwitchToGuest }: RegisterProps) {
               autoComplete="username"
               maxLength={50}
             />
-            {errors.username && <p className="auth__error">{errors.username.message}</p>}
           </div>
 
           <div className="auth__input-group">
-            <label htmlFor="password" className="auth__label">
-              Password
-            </label>
-            <Input
+            <InputWithError
               id="password"
               type="password"
+              label="Password"
               placeholder="Create a strong password"
+              error={errors.password?.message}
               {...register("password", {
                 onChange: handleInputChange("password")
               })}
@@ -108,17 +103,15 @@ function Register({ onSwitchToLogin, onSwitchToGuest }: RegisterProps) {
               disabled={isLoading}
               autoComplete="new-password"
             />
-            {errors.password && <p className="auth__error">{errors.password.message}</p>}
           </div>
 
           <div className="auth__input-group">
-            <label htmlFor="confirmPassword" className="auth__label">
-              Confirm Password
-            </label>
-            <Input
+            <InputWithError
               id="confirmPassword"
               type="password"
+              label="Confirm Password"
               placeholder="Confirm your password"
+              error={errors.confirmPassword?.message}
               {...register("confirmPassword", {
                 onChange: handleInputChange("confirmPassword")
               })}
@@ -126,7 +119,6 @@ function Register({ onSwitchToLogin, onSwitchToGuest }: RegisterProps) {
               disabled={isLoading}
               autoComplete="new-password"
             />
-            {errors.confirmPassword && <p className="auth__error">{errors.confirmPassword.message}</p>}
           </div>
 
           {error && <div className="auth__error-banner">{error}</div>}

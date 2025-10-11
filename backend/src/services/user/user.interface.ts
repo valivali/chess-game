@@ -1,0 +1,13 @@
+import { User, UserUpdate } from "@/types/domain"
+import { RegisterRequest } from "@/types/api"
+
+export interface UserServiceInterface {
+  createUser(userData: RegisterRequest): Promise<User>
+  findUserById(id: string): Promise<User | null>
+  findUserByEmail(email: string): Promise<User | null>
+  findUserByUsername(username: string): Promise<User | null>
+  verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean>
+  updateUser(id: string, updates: UserUpdate): Promise<User | null>
+  deleteUser(id: string): Promise<boolean>
+  verifyEmail(userId: string): Promise<boolean>
+}

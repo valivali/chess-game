@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { PIECE_COLOR, GAME_STATUS, PIECE_TYPE } from "@/types/gameTypes"
+import { PIECE_COLOR, GAME_STATUS, PIECE_TYPE } from "@/types/game-types"
 
 // Base schemas
 export const PositionSchema = z.object({

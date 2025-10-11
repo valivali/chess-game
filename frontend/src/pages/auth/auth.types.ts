@@ -31,14 +31,6 @@ export interface AuthState {
   error: string | null
 }
 
-export interface AuthContextType extends AuthState {
-  login: (credentials: LoginRequest) => Promise<void>
-  register: (userData: RegisterRequest) => Promise<void>
-  logout: () => void
-  clearError: () => void
-  refreshTokens: () => Promise<void>
-}
-
 export type AuthMode = "login" | "register" | "guest"
 
 export interface AuthFormData {
@@ -47,6 +39,3 @@ export interface AuthFormData {
   password: string
   confirmPassword: string
 }
-
-// Re-export User type for convenience in auth context
-export type { User } from "../../types/user.types"

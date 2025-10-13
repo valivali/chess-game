@@ -9,6 +9,7 @@ export class UserDao implements UserDaoInterface {
     const dbData = this.mapper.toSchema(userCreate)
     const userDocument = new UserModel(dbData)
     const savedUser = await userDocument.save()
+    console.log('savedUser', savedUser)
     return this.mapper.fromSchema(savedUser)
   }
 

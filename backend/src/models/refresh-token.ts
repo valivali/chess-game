@@ -28,8 +28,7 @@ const refreshTokenSchema = new Schema<RefreshTokenDocument>(
   }
 )
 
-// Indexes for performance
+// Index for performance - userId lookup
 refreshTokenSchema.index({ userId: 1 })
-refreshTokenSchema.index({ token: 1 })
 
 export const RefreshTokenModel = model<RefreshTokenDocument>("RefreshToken", refreshTokenSchema)

@@ -1,8 +1,10 @@
+import { config } from "dotenv"
+config()
+
 import express from "express"
 import cors from "cors"
 import helmet from "helmet"
 import morgan from "morgan"
-import dotenv from "dotenv"
 import mongoose from "mongoose"
 import { createServer } from "http"
 import { Server } from "socket.io"
@@ -10,16 +12,12 @@ import { Server } from "socket.io"
 import { errorHandler } from "@/middleware/error-handler"
 import { notFoundHandler } from "@/middleware/not-found-handler"
 import { generalLimiter } from "@/middleware/rate-limiter"
-import gameRoutes from "@/routes/game-routes"
 import authRoutes from "@/routes/auth-routes"
+import gameRoutes from "@/routes/game-routes"
 
-// Load environment variables
-dotenv.config()
-
-// MongoDB connection
 const connectToDatabase = async (): Promise<void> => {
   try {
-    const mongoUri = process.env.MONGODB_URI || "mongodb://user:pass@localhost:27017/?authSource=admin"
+    const mongoUri = process.env.MONGODB_URI || ""
     await mongoose.connect(mongoUri)
     console.log("✅ Connected to MongoDB")
   } catch (error) {

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import React, { createContext, useContext, useEffect, useReducer } from "react"
+import React, { createContext, useContext, useEffect, useReducer, useRef } from "react"
 import { match } from "ts-pattern"
 
 import type { AuthState, AuthTokens, LoginRequest, RegisterRequest } from "../pages/auth/auth.types"
@@ -86,10 +86,12 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
+  const isInitializedRef = useRef(false)
 
   useEffect(() => {
     const initializeAuth = async () => {
-      if (authService.isAuthenticated()) {
+      if (authService.isAuthenticated() && !isInitializedRef.current) {
+        isInitializedRef.current = true
         dispatch({ type: "SET_LOADING", payload: true })
 
         try {
@@ -114,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error("Failed to initialize authentication:", error)
           authService.logout()
           dispatch({ type: "LOGOUT" })
+          isInitializedRef.current = false // Reset on error to allow retry
         }
       }
     }

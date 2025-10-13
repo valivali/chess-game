@@ -1,1 +1,1 @@
-export { JwtConfig, JwtConfigInterface } from "./jwt-config"
+export { JwtConfig } from "./jwt-config"

@@ -17,7 +17,6 @@ function Welcome() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  // Show guest welcome for unauthenticated users
   if (!isAuthenticated) {
     return <GuestWelcome />
   }
@@ -39,7 +38,6 @@ function Welcome() {
     }
   }
 
-  // Show main welcome screen for authenticated users
   return (
     <div className="welcome__container">
       <Card className="welcome__card">

@@ -3,17 +3,20 @@ import { v4 as uuidv4 } from "uuid"
 import { match } from "ts-pattern"
 import { RefreshTokenModel } from "@/models/refresh-token"
 import { AuthTokens, JwtPayload } from "@/types/auth-types"
-import { JwtConfig, JwtConfigInterface } from "@/config"
 import { TokenServiceInterface } from "./token.interface"
 
 export class TokenService implements TokenServiceInterface {
-  constructor(private readonly jwtConfig: JwtConfigInterface) {}
+  constructor() {}
+
+  static build(): TokenService {
+    return new TokenService()
+  }
 
   async generateTokens(payload: Omit<JwtPayload, "iat" | "exp">): Promise<AuthTokens> {
     const options: SignOptions = {
-      expiresIn: parseInt(this.jwtConfig.accessTokenExpiry) || 1800 // Default to 30 minutes
+      expiresIn: parseInt(process.env["JWT_EXPIRES_IN"] || "") || 1800 // Default to 30 minutes
     }
-    const accessToken = jwt.sign(payload as object, this.jwtConfig.jwtSecret, options)
+    const accessToken = jwt.sign(payload as object, process.env["JWT_SECRET"] || "", options)
 
     const refreshTokenValue = uuidv4()
     const refreshTokenExpiry = this.getRefreshTokenExpiry()
@@ -37,7 +40,7 @@ export class TokenService implements TokenServiceInterface {
 
   verifyAccessToken(token: string): JwtPayload | null {
     try {
-      const decoded = jwt.verify(token, this.jwtConfig.jwtSecret) as JwtPayload
+      const decoded = jwt.verify(token, process.env["JWT_SECRET"] || "") as JwtPayload
       return decoded
     } catch (error) {
       return null
@@ -83,7 +86,7 @@ export class TokenService implements TokenServiceInterface {
     const expiry = new Date(now)
 
     // Parse refresh token expiry (e.g., "7d", "24h", "60m")
-    const regexMatch = this.jwtConfig.refreshTokenExpiry.match(/^(\d+)([dhm])$/)
+    const regexMatch = process.env["JWT_REFRESH_EXPIRES_IN"]?.match(/^(\d+)([dhm])$/)
     if (regexMatch && regexMatch[1] && regexMatch[2]) {
       const value = parseInt(regexMatch[1])
       const unit = regexMatch[2]
@@ -100,9 +103,5 @@ export class TokenService implements TokenServiceInterface {
     }
 
     return expiry
-  }
-
-  static build(): TokenService {
-    return new TokenService(JwtConfig.build())
   }
 }

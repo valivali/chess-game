@@ -3,6 +3,7 @@ import "./Welcome.scss"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import { ConnectedHeader } from "../../components/ConnectedHeader"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { useAuth, useGameContext } from "../../contexts"
@@ -38,27 +39,37 @@ function Welcome() {
     }
   }
 
+  const handleMenuToggle = () => {
+    console.log("Menu toggled")
+  }
+
   return (
-    <div className="welcome__container">
-      <Card className="welcome__card">
-        <CardHeader className="welcome__header">
-          <CardTitle className="welcome__title">Welcome back, {user?.username}!</CardTitle>
-          <CardDescription className="welcome__description">
-            Ready to continue your chess journey? Start a new game or challenge yourself!
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="welcome__content">
-          <div className="welcome__form">
-            <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button" disabled={isLoading}>
-              {isLoading ? "Creating Game..." : "🎮 Start Game"}
-            </Button>
+    <div className="welcome__authenticated">
+      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} />
 
-            {error && <p className="welcome__error">{error}</p>}
-          </div>
+      <main className="welcome__main">
+        <div className="welcome__container">
+          <Card className="welcome__card">
+            <CardHeader className="welcome__header">
+              <CardTitle className="welcome__title">Welcome back, {user?.username}!</CardTitle>
+              <CardDescription className="welcome__description">
+                Ready to continue your chess journey? Start a new game or challenge yourself!
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="welcome__content">
+              <div className="welcome__form">
+                <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button" disabled={isLoading}>
+                  {isLoading ? "Creating Game..." : "🎮 Start Game"}
+                </Button>
 
-          <p className="welcome__subtitle">Play anytime, anywhere on any device</p>
-        </CardContent>
-      </Card>
+                {error && <p className="welcome__error">{error}</p>}
+              </div>
+
+              <p className="welcome__subtitle">Play anytime, anywhere on any device</p>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   )
 }

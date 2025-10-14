@@ -1,4 +1,30 @@
 .welcome {
+  // Authenticated user layout
+  &__authenticated {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background-secondary);
+  }
+
+  &__main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-emerald-400), var(--color-teal-500), var(--color-cyan-600));
+    padding: 1rem;
+
+    @media (min-width: 640px) {
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      padding: 2rem;
+    }
+  }
+
+  // Guest user layout (original container for guest welcome)
   &__container {
     min-height: 100vh;
     display: flex;
@@ -13,6 +39,13 @@
 
     @media (min-width: 1024px) {
       padding: 2rem;
+    }
+
+    // When inside authenticated layout, adjust styles
+    .welcome__authenticated & {
+      min-height: auto;
+      flex: 1;
+      background: none;
     }
   }
 

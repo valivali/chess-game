@@ -89,3 +89,39 @@ export interface HistoricalMove {
 export interface MoveHistory {
   moves: HistoricalMove[]
 }
+
+// Game list types for pagination
+export interface GameListItem {
+  id: string
+  opponentName: string
+  moveCount: number
+  currentPlayer: PieceColor
+  status: GameStatus
+  lastMove: Date
+  userColor: PieceColor
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface GameHistoryItem {
+  id: string
+  opponentName: string
+  result: "win" | "loss" | "draw"
+  endReason: "checkmate" | "stalemate" | "draw" | "resignation" | "timeout"
+  moveCount: number
+  duration: number // in minutes
+  completedAt: Date
+  userColor: PieceColor
+}
+
+export interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
+export interface PaginatedResponse<T> {
+  items: T[]
+  pagination: PaginationInfo
+}

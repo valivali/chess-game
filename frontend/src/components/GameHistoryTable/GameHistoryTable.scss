@@ -1,0 +1,199 @@
+.game-history-table {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  &__stats {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__stat {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+
+    &--wins {
+      background-color: var(--color-green-500);
+      color: var(--color-white);
+    }
+
+    &--losses {
+      background-color: var(--color-red-500);
+      color: var(--color-white);
+    }
+
+    &--draws {
+      background-color: var(--color-amber-500);
+      color: var(--color-white);
+    }
+  }
+
+  &__game-id {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--color-emerald-600);
+  }
+
+  &__opponent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  &__opponent-name {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  &__user-color {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+
+  &__duration {
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  &__date {
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+  }
+}
+
+// Result badge styles
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  &__text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+
+    &--win {
+      background-color: var(--color-green-500);
+      color: var(--color-white);
+    }
+
+    &--loss {
+      background-color: var(--color-red-500);
+      color: var(--color-white);
+    }
+
+    &--draw {
+      background-color: var(--color-amber-500);
+      color: var(--color-white);
+    }
+  }
+
+  &__color {
+    font-size: 0.875rem;
+  }
+}
+
+// End reason badge styles
+.end-reason-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background-color: var(--color-background-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+
+  &--checkmate {
+    background-color: var(--color-red-100);
+    color: var(--color-red-700);
+  }
+
+  &--stalemate {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-700);
+  }
+
+  &--draw {
+    background-color: var(--color-amber-100);
+    color: var(--color-amber-700);
+  }
+
+  &--resignation {
+    background-color: var(--color-orange-100);
+    color: var(--color-orange-700);
+  }
+
+  &--timeout {
+    background-color: var(--color-blue-100);
+    color: var(--color-blue-700);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .game-history-table {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    &__title {
+      font-size: 1.25rem;
+    }
+
+    &__stats {
+      gap: 0.375rem;
+    }
+
+    &__stat {
+      font-size: 0.8125rem;
+      padding: 0.1875rem 0.375rem;
+    }
+
+    &__opponent {
+      gap: 0.25rem;
+    }
+
+    &__opponent-name {
+      font-size: 0.875rem;
+    }
+
+    &__user-color {
+      font-size: 0.6875rem;
+    }
+  }
+
+  .result-badge {
+    gap: 0.25rem;
+
+    &__text {
+      font-size: 0.6875rem;
+      padding: 0.1875rem 0.375rem;
+    }
+
+    &__color {
+      font-size: 0.8125rem;
+    }
+  }
+
+  .end-reason-badge {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.375rem;
+  }
+}

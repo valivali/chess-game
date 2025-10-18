@@ -9,24 +9,26 @@ export interface ApiResponse<T = any> {
   timestamp: string
 }
 
-export interface ApiError {
-  message: string
-  status: number
-  code?: string
+// Pagination types
+export interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
 }
 
 export interface PaginatedResponse<T> {
-  data: T[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+  items: T[]
+  pagination: PaginationInfo
 }
 
-export interface ApiRequestConfig {
-  timeout?: number
-  retries?: number
-  headers?: Record<string, string>
+// Base API response types
+export interface SuccessResponse<T> extends ApiResponse<T> {
+  status: "success"
+  data: T
+}
+
+export interface ErrorResponse extends ApiResponse {
+  status: "error"
+  message: string
 }

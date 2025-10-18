@@ -1,4 +1,14 @@
-import { Game, GameStatusInfo, PIECE_COLOR, GAME_STATUS, PIECE_TYPE, PieceType } from "@/types/game-types"
+import {
+  Game,
+  GameStatusInfo,
+  GameListItem,
+  GameHistoryItem,
+  PaginatedResponse,
+  PIECE_COLOR,
+  GAME_STATUS,
+  PIECE_TYPE,
+  PieceType
+} from "@/types/game-types"
 import { GameDao, GameDaoInterface } from "@/persistence"
 import { GameServiceInterface } from "./game.interface"
 import { v4 as uuidv4 } from "uuid"
@@ -102,6 +112,102 @@ export class GameService implements GameServiceInterface {
       winner: game.winner,
       isInCheck: false, // Simplified for now
       availableMoves: [] // Simplified for now
+    }
+  }
+
+  async getActiveGames(userId: string, page: number, limit: number): Promise<PaginatedResponse<GameListItem>> {
+    // For now, return mock data - in a real implementation, this would query the database
+    // filtering for games where the user is a participant and the game is still active
+    const mockActiveGames: GameListItem[] = [
+      {
+        id: "550e8400-e29b-41d4-a716-446655440001",
+        opponentName: "ChessMaster2024",
+        moveCount: 15,
+        currentPlayer: PIECE_COLOR.WHITE,
+        status: GAME_STATUS.ACTIVE,
+        lastMove: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+        userColor: PIECE_COLOR.WHITE,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        updatedAt: new Date(Date.now() - 1000 * 60 * 30)
+      },
+      {
+        id: "550e8400-e29b-41d4-a716-446655440002",
+        opponentName: "KnightRider",
+        moveCount: 8,
+        currentPlayer: PIECE_COLOR.BLACK,
+        status: GAME_STATUS.ACTIVE,
+        lastMove: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        userColor: PIECE_COLOR.BLACK,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4), // 4 hours ago
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2)
+      }
+    ]
+
+    // Apply pagination
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    const paginatedItems = mockActiveGames.slice(startIndex, endIndex)
+
+    return {
+      items: paginatedItems,
+      pagination: {
+        page,
+        limit,
+        total: mockActiveGames.length,
+        totalPages: Math.ceil(mockActiveGames.length / limit)
+      }
+    }
+  }
+
+  async getGameHistory(userId: string, page: number, limit: number): Promise<PaginatedResponse<GameHistoryItem>> {
+    // For now, return mock data - in a real implementation, this would query the database
+    // filtering for completed games where the user was a participant
+    const mockGameHistory: GameHistoryItem[] = [
+      {
+        id: "550e8400-e29b-41d4-a716-446655440003",
+        opponentName: "GrandMaster99",
+        result: "win",
+        endReason: "checkmate",
+        moveCount: 42,
+        duration: 35, // 35 minutes
+        completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+        userColor: PIECE_COLOR.WHITE
+      },
+      {
+        id: "550e8400-e29b-41d4-a716-446655440004",
+        opponentName: "RookiePlayer",
+        result: "loss",
+        endReason: "resignation",
+        moveCount: 28,
+        duration: 18, // 18 minutes
+        completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
+        userColor: PIECE_COLOR.BLACK
+      },
+      {
+        id: "550e8400-e29b-41d4-a716-446655440005",
+        opponentName: "DrawMaster",
+        result: "draw",
+        endReason: "stalemate",
+        moveCount: 67,
+        duration: 52, // 52 minutes
+        completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 1 week ago
+        userColor: PIECE_COLOR.WHITE
+      }
+    ]
+
+    // Apply pagination
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    const paginatedItems = mockGameHistory.slice(startIndex, endIndex)
+
+    return {
+      items: paginatedItems,
+      pagination: {
+        page,
+        limit,
+        total: mockGameHistory.length,
+        totalPages: Math.ceil(mockGameHistory.length / limit)
+      }
     }
   }
 

@@ -33,6 +33,12 @@ export const GameIdParamSchema = z.object({
   gameId: z.string().uuid()
 })
 
+// Pagination schemas
+export const PaginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10)
+})
+
 // Response schemas for validation
 export const GameResponseSchema = z.object({
   id: z.string().uuid(),
@@ -78,6 +84,44 @@ export const HistoricalMoveResponseSchema = z.object({
 export const MoveHistoryResponseSchema = z.object({
   moves: z.array(HistoricalMoveResponseSchema)
 })
+
+// Game list response schemas
+export const GameListItemSchema = z.object({
+  id: z.string().uuid(),
+  opponentName: z.string(),
+  moveCount: z.number().int().min(0),
+  currentPlayer: PieceColorSchema,
+  status: GameStatusSchema,
+  lastMove: z.date(),
+  userColor: PieceColorSchema,
+  createdAt: z.date(),
+  updatedAt: z.date()
+})
+
+export const GameHistoryItemSchema = z.object({
+  id: z.string().uuid(),
+  opponentName: z.string(),
+  result: z.enum(["win", "loss", "draw"]),
+  endReason: z.enum(["checkmate", "stalemate", "draw", "resignation", "timeout"]),
+  moveCount: z.number().int().min(0),
+  duration: z.number().int().min(0), // in minutes
+  completedAt: z.date(),
+  userColor: PieceColorSchema
+})
+
+export const PaginatedResponseSchema = <T>(itemSchema: z.ZodSchema<T>) =>
+  z.object({
+    items: z.array(itemSchema),
+    pagination: z.object({
+      page: z.number().int().min(1),
+      limit: z.number().int().min(1),
+      total: z.number().int().min(0),
+      totalPages: z.number().int().min(0)
+    })
+  })
+
+export const ActiveGamesResponseSchema = PaginatedResponseSchema(GameListItemSchema)
+export const GameHistoryResponseSchema = PaginatedResponseSchema(GameHistoryItemSchema)
 
 // Authentication validation schemas
 export const RegisterRequestSchema = z
@@ -134,10 +178,15 @@ export const EmailVerificationRequestSchema = z.object({
 export type CreateGameRequestDto = z.infer<typeof CreateGameRequestSchema>
 export type MakeMoveRequestDto = z.infer<typeof MakeMoveRequestSchema>
 export type GameIdParamDto = z.infer<typeof GameIdParamSchema>
+export type PaginationQueryDto = z.infer<typeof PaginationQuerySchema>
 export type GameResponseDto = z.infer<typeof GameResponseSchema>
 export type MoveResultResponseDto = z.infer<typeof MoveResultResponseSchema>
 export type GameStatusResponseDto = z.infer<typeof GameStatusResponseSchema>
 export type MoveHistoryResponseDto = z.infer<typeof MoveHistoryResponseSchema>
+export type GameListItemDto = z.infer<typeof GameListItemSchema>
+export type GameHistoryItemDto = z.infer<typeof GameHistoryItemSchema>
+export type ActiveGamesResponseDto = z.infer<typeof ActiveGamesResponseSchema>
+export type GameHistoryResponseDto = z.infer<typeof GameHistoryResponseSchema>
 
 // Authentication DTOs
 export type RegisterRequestDto = z.infer<typeof RegisterRequestSchema>

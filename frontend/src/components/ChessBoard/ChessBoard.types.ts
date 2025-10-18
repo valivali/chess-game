@@ -28,6 +28,24 @@ export const GAME_STATUS = {
 
 export type GameStatus = (typeof GAME_STATUS)[keyof typeof GAME_STATUS]
 
+export const GAME_RESULT = {
+  WIN: "win",
+  LOSS: "loss",
+  DRAW: "draw"
+} as const
+
+export type GameResult = (typeof GAME_RESULT)[keyof typeof GAME_RESULT]
+
+export const GAME_END_REASON = {
+  CHECKMATE: "checkmate",
+  STALEMATE: "stalemate",
+  DRAW: "draw",
+  RESIGNATION: "resignation",
+  TIMEOUT: "timeout"
+} as const
+
+export type GameEndReason = (typeof GAME_END_REASON)[keyof typeof GAME_END_REASON]
+
 export const PIECE_WEIGHTS = {
   [PIECE_TYPE.PAWN]: 1,
   [PIECE_TYPE.BISHOP]: 3,

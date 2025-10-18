@@ -1,11 +1,26 @@
 import { Router } from "express"
 import { GameController } from "@/controllers/game/game"
-import { validateBody, validateParams } from "@/middleware/validation"
+import { validateBody, validateParams, validateQuery } from "@/middleware/validation"
 import { authMiddleware } from "@/middleware/auth-middleware"
-import { CreateGameRequestSchema, MakeMoveRequestSchema, GameIdParamSchema } from "@/validation/schemas"
+import { CreateGameRequestSchema, MakeMoveRequestSchema, GameIdParamSchema, PaginationQuerySchema } from "@/validation/schemas"
 
 const router = Router()
 const gameController = GameController.build()
+
+// Game list endpoints (require authentication)
+router.get(
+  "/active",
+  authMiddleware.authenticate, // Require authentication for user-specific data
+  validateQuery(PaginationQuerySchema),
+  gameController.getActiveGames.bind(gameController)
+)
+
+router.get(
+  "/history",
+  authMiddleware.authenticate, // Require authentication for user-specific data
+  validateQuery(PaginationQuerySchema),
+  gameController.getGameHistory.bind(gameController)
+)
 
 // Game CRUD operations
 router.post(

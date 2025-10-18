@@ -5,7 +5,7 @@ import { MoveService } from "@/services/move/move"
 import { MoveServiceInterface } from "@/services/move/move.interface"
 import { ResponseFormatter } from "@/utils/response-formatter"
 import { GameConverters } from "@/converters/game-converters"
-import { CreateGameRequestDto, GameIdParamDto, MakeMoveRequestDto } from "@/validation/schemas"
+import { CreateGameRequestDto, GameIdParamDto, MakeMoveRequestDto, PaginationQueryDto } from "@/validation/schemas"
 
 export class GameController {
   constructor(
@@ -144,6 +144,42 @@ export class GameController {
 
       const historyDto = GameConverters.moveHistoryToDto(history)
       ResponseFormatter.success(res, { history: historyDto })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async getActiveGames(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // Get user ID from JWT token - required for this endpoint
+      const userId = req.user?.userId
+      if (!userId) {
+        ResponseFormatter.error(res, "Authentication required", 401)
+        return
+      }
+
+      const { page, limit } = req.query as unknown as PaginationQueryDto
+      const activeGames = await this.gameService.getActiveGames(userId, page, limit)
+
+      ResponseFormatter.success(res, activeGames)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async getGameHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // Get user ID from JWT token - required for this endpoint
+      const userId = req.user?.userId
+      if (!userId) {
+        ResponseFormatter.error(res, "Authentication required", 401)
+        return
+      }
+
+      const { page, limit } = req.query as unknown as PaginationQueryDto
+      const gameHistory = await this.gameService.getGameHistory(userId, page, limit)
+
+      ResponseFormatter.success(res, gameHistory)
     } catch (error) {
       next(error)
     }

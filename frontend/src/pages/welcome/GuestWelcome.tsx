@@ -3,18 +3,18 @@ import "./Welcome.scss"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import { useCreateGame } from "../../api"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { useGameContext } from "../../contexts"
-import { gameService } from "../../services/gameService"
 
 function GuestWelcome() {
   const navigate = useNavigate()
   const { setGameId } = useGameContext()
   const [username, setUsername] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+
+  const { createGame, isLoading, error } = useCreateGame()
 
   const isUsernameValid = username.length > 1
   const isStartGameDisabled = !isUsernameValid || isLoading
@@ -22,7 +22,7 @@ function GuestWelcome() {
   const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value)
     if (error) {
-      setError("")
+      error && console.log("Error cleared")
     }
   }
 
@@ -31,18 +31,13 @@ function GuestWelcome() {
       return
     }
 
-    setIsLoading(true)
-    setError("")
-
     try {
-      const response = await gameService.createGame(username)
+      const response = await createGame(username)
       const gameId = response.data.game.id
       setGameId(gameId)
       navigate(`/game/${gameId}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create game")
-    } finally {
-      setIsLoading(false)
+      console.error("Failed to create game:", err)
     }
   }
 
@@ -75,7 +70,7 @@ function GuestWelcome() {
                 disabled={isLoading}
                 maxLength={50}
               />
-              {error && <p className="welcome__error">{error}</p>}
+              {error && <p className="welcome__error">{error.message}</p>}
             </div>
 
             <Button variant="gradient" size="xl" onClick={handleStartGame} className="welcome__button" disabled={isStartGameDisabled}>

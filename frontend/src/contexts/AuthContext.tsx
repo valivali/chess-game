@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import React, { createContext, useContext, useEffect, useReducer, useRef } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react"
 import { match } from "ts-pattern"
 
 import type { AuthState, AuthTokens, LoginRequest, RegisterRequest } from "../pages/auth/auth.types"
@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth()
   }, [])
 
-  const login = async (credentials: LoginRequest): Promise<void> => {
+  const login = useCallback(async (credentials: LoginRequest): Promise<void> => {
     dispatch({ type: "AUTH_START" })
 
     try {
@@ -143,9 +143,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       })
       throw error
     }
-  }
+  }, [])
 
-  const register = async (userData: RegisterRequest): Promise<void> => {
+  const register = useCallback(async (userData: RegisterRequest): Promise<void> => {
     dispatch({ type: "AUTH_START" })
 
     try {
@@ -164,18 +164,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       })
       throw error
     }
-  }
+  }, [])
 
-  const logout = (): void => {
+  const logout = useCallback((): void => {
     authService.logout()
     dispatch({ type: "LOGOUT" })
-  }
+  }, [])
 
-  const clearError = (): void => {
+  const clearError = useCallback((): void => {
     dispatch({ type: "CLEAR_ERROR" })
-  }
+  }, [])
 
-  const refreshTokens = async (): Promise<void> => {
+  const refreshTokens = useCallback(async (): Promise<void> => {
     try {
       const tokens = await authService.refreshTokens()
       dispatch({ type: "UPDATE_TOKENS", payload: tokens })
@@ -183,16 +183,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logout()
       throw error
     }
-  }
+  }, [logout])
 
-  const contextValue: IAuthContext = {
-    ...state,
-    login,
-    register,
-    logout,
-    clearError,
-    refreshTokens
-  }
+  const contextValue: IAuthContext = useMemo(
+    () => ({
+      ...state,
+      login,
+      register,
+      logout,
+      clearError,
+      refreshTokens
+    }),
+    [state, login, register, logout, clearError, refreshTokens]
+  )
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
 }

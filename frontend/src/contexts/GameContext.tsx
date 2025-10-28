@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext, useState } from "react"
+import React, { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react"
 
 interface GameContextType {
   gameId: string | null
@@ -15,19 +15,22 @@ interface GameProviderProps {
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const [gameId, setGameIdState] = useState<string | null>(null)
 
-  const setGameId = (newGameId: string | null) => {
+  const setGameId = useCallback((newGameId: string | null) => {
     setGameIdState(newGameId)
-  }
+  }, [])
 
-  const clearGameId = () => {
+  const clearGameId = useCallback(() => {
     setGameIdState(null)
-  }
+  }, [])
 
-  const value: GameContextType = {
-    gameId,
-    setGameId,
-    clearGameId
-  }
+  const value: GameContextType = useMemo(
+    () => ({
+      gameId,
+      setGameId,
+      clearGameId
+    }),
+    [gameId, setGameId, clearGameId]
+  )
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }

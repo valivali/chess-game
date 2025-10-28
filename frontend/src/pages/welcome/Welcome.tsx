@@ -3,15 +3,13 @@ import "./Welcome.scss"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import { useActiveGames, useCreateGame, useGameHistory } from "../../api"
 import { ActiveGamesTable } from "../../components/ActiveGamesTable"
 import { ConnectedHeader } from "../../components/ConnectedHeader"
 import { GameHistoryTable } from "../../components/GameHistoryTable"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { useAuth, useGameContext } from "../../contexts"
-import { useActiveGames } from "../../hooks/useActiveGames"
-import { useGameHistory } from "../../hooks/useGameHistory"
-import { gameService } from "../../services"
 import GuestWelcome from "./GuestWelcome"
 
 function Welcome() {
@@ -19,78 +17,50 @@ function Welcome() {
   const { setGameId } = useGameContext()
   const { isAuthenticated, user, isLoading: isAuthLoading } = useAuth()
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [activeGamesPage, setActiveGamesPage] = useState(1)
+  const [historyPage, setHistoryPage] = useState(1)
 
   const {
     activeGames,
     pagination: activeGamesPagination,
-    isLoading: isLoadingActiveGames,
-    loadGames: loadActiveGames,
-    initializeData: initializeActiveGames,
-    clearData: clearActiveGames
-  } = useActiveGames(isAuthenticated)
+    isLoading: isLoadingActiveGames
+  } = useActiveGames(isAuthenticated, activeGamesPage)
 
-  const {
-    gameHistory,
-    pagination: historyPagination,
-    isLoading: isLoadingHistory,
-    loadHistory: loadGameHistory,
-    initializeData: initializeGameHistory,
-    clearData: clearGameHistory
-  } = useGameHistory(isAuthenticated)
+  const { gameHistory, pagination: historyPagination, isLoading: isLoadingHistory } = useGameHistory(isAuthenticated, historyPage)
 
-  const handleActiveGamesPageChange = useCallback(
-    (page: number) => {
-      loadActiveGames(page)
-    },
-    [loadActiveGames]
-  )
+  const { createGame, isLoading: isCreatingGame, error: createGameError } = useCreateGame()
 
-  const handleHistoryPageChange = useCallback(
-    (page: number) => {
-      loadGameHistory(page)
-    },
-    [loadGameHistory]
-  )
+  const handleActiveGamesPageChange = useCallback((page: number) => {
+    setActiveGamesPage(page)
+  }, [])
+
+  const handleHistoryPageChange = useCallback((page: number) => {
+    setHistoryPage(page)
+  }, [])
 
   const handleStartGame = useCallback(async () => {
-    setIsLoading(true)
-    setError("")
-
     try {
-      const response = await gameService.createGame(user?.username || "Player")
+      const response = await createGame(user?.username || "Player")
       const gameId = response.data.game.id
       setGameId(gameId)
       navigate(`/game/${gameId}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create game")
-    } finally {
-      setIsLoading(false)
+      console.error("Failed to create game:", err)
     }
-  }, [user?.username, setGameId, navigate])
+  }, [createGame, user?.username, setGameId, navigate])
 
   const handleMenuToggle = useCallback(() => {
     console.log("Menu toggled")
   }, [])
 
   useEffect(() => {
-    console.log("1")
     if (!isAuthLoading) {
-      console.log("2")
-      if (isAuthenticated) {
-        console.log("3")
-        initializeActiveGames()
-        initializeGameHistory()
-      } else {
-        clearActiveGames()
-        clearGameHistory()
-      }
+      setActiveGamesPage(1)
+      setHistoryPage(1)
     }
   }, [isAuthenticated, isAuthLoading])
 
   if (isAuthLoading) {
-    console.log("4")
     return (
       <div className="welcome__loading">
         <p>Loading...</p>
@@ -118,11 +88,11 @@ function Welcome() {
               </CardHeader>
               <CardContent className="welcome__content">
                 <div className="welcome__form">
-                  <Button variant="gradient" size="lg" onClick={handleStartGame} className="welcome__button" disabled={isLoading}>
-                    {isLoading ? "Creating Game..." : "🎮 Start New Game"}
+                  <Button variant="gradient" size="lg" onClick={handleStartGame} className="welcome__button" disabled={isCreatingGame}>
+                    {isCreatingGame ? "Creating Game..." : "🎮 Start New Game"}
                   </Button>
 
-                  {error && <p className="welcome__error">{error}</p>}
+                  {createGameError && <p className="welcome__error">{createGameError.message}</p>}
                 </div>
               </CardContent>
             </Card>
@@ -134,7 +104,7 @@ function Welcome() {
                 games={activeGames}
                 isLoading={isLoadingActiveGames}
                 onNewGame={handleStartGame}
-                isCreatingGame={isLoading}
+                isCreatingGame={isCreatingGame}
                 pagination={activeGamesPagination}
                 onPageChange={handleActiveGamesPageChange}
               />
@@ -145,7 +115,7 @@ function Welcome() {
                 games={gameHistory}
                 isLoading={isLoadingHistory}
                 onNewGame={handleStartGame}
-                isCreatingGame={isLoading}
+                isCreatingGame={isCreatingGame}
                 pagination={historyPagination}
                 onPageChange={handleHistoryPageChange}
               />

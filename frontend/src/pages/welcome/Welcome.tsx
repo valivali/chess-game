@@ -53,6 +53,17 @@ function Welcome() {
     console.log("Menu toggled")
   }, [])
 
+  const handleGoToTraining = useCallback(() => {
+    navigate("/training")
+  }, [navigate])
+
+  const handleNavigate = useCallback(
+    (link: string) => {
+      navigate(link)
+    },
+    [navigate]
+  )
+
   useEffect(() => {
     if (!isAuthLoading) {
       setActiveGamesPage(1)
@@ -74,7 +85,7 @@ function Welcome() {
 
   return (
     <div className="welcome__authenticated">
-      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} />
+      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
 
       <main className="welcome__main-dashboard">
         <div className="welcome__dashboard-container">
@@ -90,6 +101,10 @@ function Welcome() {
                 <div className="welcome__form">
                   <Button variant="gradient" size="lg" onClick={handleStartGame} className="welcome__button" disabled={isCreatingGame}>
                     {isCreatingGame ? "Creating Game..." : "🎮 Start New Game"}
+                  </Button>
+
+                  <Button variant="outline" size="lg" onClick={handleGoToTraining} className="welcome__button">
+                    🎯 Chess Training
                   </Button>
 
                   {createGameError && <p className="welcome__error">{createGameError.message}</p>}

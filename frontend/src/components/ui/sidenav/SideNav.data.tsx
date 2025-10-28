@@ -1,12 +1,16 @@
 import {
   ChessIcon,
+  CoachIcon,
   GameIcon,
   HistoryIcon,
   HomeIcon,
+  OpeningsIcon,
   ProfileIcon,
   SettingsIcon,
   StatsIcon,
-  TournamentIcon
+  TacticsIcon,
+  TournamentIcon,
+  TrainingIcon
 } from "../../../assets/sidenav"
 import type { INavElement } from "./SideNav.types"
 
@@ -45,24 +49,50 @@ export const mockNavData: INavElement[] = [
   },
   {
     id: "n3",
+    text: "Training",
+    icon: <TrainingIcon />,
+    link: "/training",
+    children: [
+      {
+        id: "n31",
+        text: "Chess Openings",
+        icon: <OpeningsIcon />,
+        link: "/training/openings"
+      },
+      {
+        id: "n32",
+        text: "Tactics and Traps",
+        icon: <TacticsIcon />,
+        link: "/training/tactics"
+      },
+      {
+        id: "n33",
+        text: "Play with Coach",
+        icon: <CoachIcon />,
+        link: "/training/coach"
+      }
+    ]
+  },
+  {
+    id: "n4",
     text: "Statistics",
     icon: <StatsIcon />,
     link: "/statistics"
   },
   {
-    id: "n4",
+    id: "n5",
     text: "Profile",
     icon: <ProfileIcon />,
     link: "/profile",
     children: [
       {
-        id: "n41",
+        id: "n51",
         text: "Account Settings",
         icon: <SettingsIcon />,
         link: "/profile/settings"
       },
       {
-        id: "n42",
+        id: "n52",
         text: "Game Preferences",
         icon: <GameIcon />,
         link: "/profile/preferences"
@@ -70,7 +100,7 @@ export const mockNavData: INavElement[] = [
     ]
   },
   {
-    id: "n5",
+    id: "n6",
     text: "Settings",
     icon: <SettingsIcon />,
     link: "/settings"

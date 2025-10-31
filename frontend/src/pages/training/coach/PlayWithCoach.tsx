@@ -25,7 +25,7 @@ function PlayWithCoach() {
 
   return (
     <div className="play-with-coach">
-      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
+      <ConnectedHeader user={user} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
 
       <main className="play-with-coach__main">
         <div className="play-with-coach__container">

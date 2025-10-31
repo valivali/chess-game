@@ -65,7 +65,7 @@ function Training() {
 
   return (
     <div className="training">
-      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
+      <ConnectedHeader user={user} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
 
       <main className="training__main">
         <div className="training__container">

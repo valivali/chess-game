@@ -22,6 +22,17 @@ const UserProfile: React.FC<IUserProfileProps> = ({ user }) => {
       .join("")
   }
 
+  if (!user) {
+    return (
+      <div className="connected-header__user-profile">
+        <span className="connected-header__username">Loading...</span>
+        <div className="connected-header__avatar">
+          <span className="connected-header__avatar-text">?</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="connected-header__user-profile">
       <span className="connected-header__username">{user.username}</span>

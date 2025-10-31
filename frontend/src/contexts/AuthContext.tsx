@@ -2,14 +2,14 @@ import type { ReactNode } from "react"
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react"
 import { match } from "ts-pattern"
 
+import { authApi, tokenManager } from "../api/auth.api"
 import type { AuthState, AuthTokens, LoginRequest, RegisterRequest } from "../pages/auth/auth.types"
-import { authService } from "../services/authService"
 import type { User } from "../types/user.types"
 
 export interface IAuthContext extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>
   register: (userData: RegisterRequest) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
   clearError: () => void
   refreshTokens: () => Promise<void>
 }
@@ -90,16 +90,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      if (authService.isAuthenticated() && !isInitializedRef.current) {
+      if (tokenManager.isAuthenticated() && !isInitializedRef.current) {
         isInitializedRef.current = true
         dispatch({ type: "SET_LOADING", payload: true })
 
         try {
-          const user = await authService.getProfile()
-          const accessToken = authService.getAccessToken()
-          const refreshToken = authService.getRefreshToken()
+          const user = await authApi.getProfile()
+          const accessToken = tokenManager.getAccessToken()
+          const refreshToken = tokenManager.getRefreshToken()
 
-          if (accessToken && refreshToken) {
+          if (user && accessToken && refreshToken) {
             dispatch({
               type: "AUTH_SUCCESS",
               payload: {
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } catch (error) {
           console.error("Failed to initialize authentication:", error)
-          authService.logout()
+          tokenManager.clearTokens()
           dispatch({ type: "LOGOUT" })
           isInitializedRef.current = false // Reset on error to allow retry
         }
@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: "AUTH_START" })
 
     try {
-      const authResponse = await authService.login(credentials)
+      const authResponse = await authApi.login(credentials)
       dispatch({
         type: "AUTH_SUCCESS",
         payload: {
@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: "AUTH_START" })
 
     try {
-      const authResponse = await authService.register(userData)
+      const authResponse = await authApi.register(userData)
       dispatch({
         type: "AUTH_SUCCESS",
         payload: {
@@ -166,8 +166,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [])
 
-  const logout = useCallback((): void => {
-    authService.logout()
+  const logout = useCallback(async (): Promise<void> => {
+    await authApi.logout()
     dispatch({ type: "LOGOUT" })
   }, [])
 
@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshTokens = useCallback(async (): Promise<void> => {
     try {
-      const tokens = await authService.refreshTokens()
+      const tokens = await authApi.refreshTokens()
       dispatch({ type: "UPDATE_TOKENS", payload: tokens })
     } catch (error) {
       logout()

@@ -85,7 +85,7 @@ function Welcome() {
 
   return (
     <div className="welcome__authenticated">
-      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
+      <ConnectedHeader user={user} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
 
       <main className="welcome__main-dashboard">
         <div className="welcome__dashboard-container">

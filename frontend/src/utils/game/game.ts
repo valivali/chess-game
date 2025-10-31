@@ -1,3 +1,5 @@
+import { match } from "ts-pattern"
+
 import type { GameStatus, PieceColor } from "../../components/ChessBoard/ChessBoard.types"
 import { GAME_STATUS, PIECE_COLOR } from "../../components/ChessBoard/ChessBoard.types"
 import type { IChessPiece } from "../../components/pieces"
@@ -35,15 +37,9 @@ export const isGameOver = (gameStatus: GameStatus): boolean => {
   return gameStatus === GAME_STATUS.CHECKMATE || gameStatus === GAME_STATUS.STALEMATE
 }
 
-export const getGameStatusMessage = (gameStatus: GameStatus, currentPlayer: PieceColor): string => {
-  switch (gameStatus) {
-    case GAME_STATUS.CHECKMATE:
-      return `Checkmate! ${getWinnerDisplayText(currentPlayer)} wins!`
-    case GAME_STATUS.STALEMATE:
-      return "Stalemate! The game is a draw."
-    case GAME_STATUS.CHECK:
-      return `${getCurrentPlayerDisplayText(currentPlayer)} is in check!`
-    default:
-      return ""
-  }
-}
+export const getGameStatusMessage = (gameStatus: GameStatus, currentPlayer: PieceColor): string =>
+  match(gameStatus)
+    .with(GAME_STATUS.CHECKMATE, () => `Checkmate! ${getWinnerDisplayText(currentPlayer)} wins!`)
+    .with(GAME_STATUS.STALEMATE, () => "Stalemate! The game is a draw.")
+    .with(GAME_STATUS.CHECK, () => `${getCurrentPlayerDisplayText(currentPlayer)} is in check!`)
+    .otherwise(() => "")

@@ -25,7 +25,7 @@ function TacticsAndTraps() {
 
   return (
     <div className="tactics-and-traps">
-      <ConnectedHeader user={user!} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
+      <ConnectedHeader user={user} onMenuToggle={handleMenuToggle} onNavigate={handleNavigate} />
 
       <main className="tactics-and-traps__main">
         <div className="tactics-and-traps__container">

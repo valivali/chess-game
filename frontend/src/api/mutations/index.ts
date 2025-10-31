@@ -1,5 +1,2 @@
-// Game mutations
-export * from "./useCreateGameMutation"
-
-// Auth mutations
-export * from "./useAuthMutations"
+// Opening mutations
+export * from "./useOpeningMutations"

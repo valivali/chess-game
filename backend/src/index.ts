@@ -14,6 +14,7 @@ import { notFoundHandler } from "@/middleware/not-found-handler"
 import { generalLimiter } from "@/middleware/rate-limiter"
 import authRoutes from "@/routes/auth-routes"
 import gameRoutes from "@/routes/game-routes"
+import openingRoutes from "@/routes/opening"
 
 const connectToDatabase = async (): Promise<void> => {
   try {
@@ -54,6 +55,7 @@ app.use("/api", generalLimiter)
 // Routes
 app.use("/api/auth", authRoutes)
 app.use("/api/game", gameRoutes)
+app.use("/api/opening", openingRoutes)
 
 // Health check endpoint
 app.get("/health", (req, res) => {

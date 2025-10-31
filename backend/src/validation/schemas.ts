@@ -1,5 +1,6 @@
 import { z } from "zod"
-import { PIECE_COLOR, GAME_STATUS, PIECE_TYPE } from "@/types/game-types"
+import { GAME_STATUS, PIECE_COLOR, PIECE_TYPE } from "@/types/game-types"
+import { OPENING_DIFFICULTY } from "@/types/opening-types"
 
 // Base schemas
 export const PositionSchema = z.object({
@@ -26,11 +27,11 @@ export const CreateGameRequestSchema = z.object({
 export const MakeMoveRequestSchema = z.object({
   from: PositionSchema,
   to: PositionSchema,
-  playerId: z.string().uuid()
+  playerId: z.uuid()
 })
 
 export const GameIdParamSchema = z.object({
-  gameId: z.string().uuid()
+  gameId: z.uuid()
 })
 
 // Pagination schemas
@@ -41,7 +42,7 @@ export const PaginationQuerySchema = z.object({
 
 // Response schemas for validation
 export const GameResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   board: z.array(z.array(PieceTypeSchema.nullable())),
   currentPlayer: PieceColorSchema,
   status: GameStatusSchema,
@@ -65,7 +66,7 @@ export const MoveResultResponseSchema = z.object({
 })
 
 export const GameStatusResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: GameStatusSchema,
   currentPlayer: PieceColorSchema,
   winner: PieceColorSchema.nullable(),
@@ -87,7 +88,7 @@ export const MoveHistoryResponseSchema = z.object({
 
 // Game list response schemas
 export const GameListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   opponentName: z.string(),
   moveCount: z.number().int().min(0),
   currentPlayer: PieceColorSchema,
@@ -99,7 +100,7 @@ export const GameListItemSchema = z.object({
 })
 
 export const GameHistoryItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   opponentName: z.string(),
   result: z.enum(["win", "loss", "draw"]),
   endReason: z.enum(["checkmate", "stalemate", "draw", "resignation", "timeout"]),
@@ -174,6 +175,174 @@ export const EmailVerificationRequestSchema = z.object({
   token: z.string().min(1, "Verification token is required")
 })
 
+// Popular openings query schemas
+export const PopularOpeningsQuerySchema = z.object({
+  minGames: z.coerce.number().int().min(0).optional(),
+  minRating: z.coerce.number().int().min(0).max(3000).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50)
+})
+
+export const SearchOpeningsQuerySchema = z.object({
+  q: z.string().min(1, "Search query is required"),
+  limit: z.coerce.number().int().min(1).max(100).default(50)
+})
+
+export const DifficultyParamSchema = z.object({
+  difficulty: z.enum([OPENING_DIFFICULTY.BEGINNER, OPENING_DIFFICULTY.INTERMEDIATE, OPENING_DIFFICULTY.ADVANCED])
+})
+
+// Opening-specific parameter schemas
+export const RepertoireIdParamSchema = z.object({
+  repertoireId: z.string().uuid("Invalid repertoire ID format")
+})
+
+export const SessionIdParamSchema = z.object({
+  sessionId: z.string().uuid("Invalid session ID format")
+})
+
+export const RepertoireAndNodeIdParamSchema = z.object({
+  repertoireId: z.string().uuid("Invalid repertoire ID format"),
+  nodeId: z.string().min(1, "Node ID is required")
+})
+
+export const FenParamSchema = z.object({
+  fen: z.string().min(1, "FEN string is required")
+})
+
+// Opening-specific query schemas
+export const PublicRepertoiresQuerySchema = z.object({
+  tags: z
+    .string()
+    .or(z.array(z.string()))
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined
+      return Array.isArray(val) ? val : [val]
+    }),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
+})
+
+export const UserSessionsQuerySchema = z.object({
+  status: z.string().optional()
+})
+
+export const PositionsDueQuerySchema = z.object({
+  repertoireId: z.uuid().optional()
+})
+
+// Opening repertoire schemas
+export const OpeningMoveSchema = z.object({
+  san: z.string().min(1, "SAN notation is required"),
+  from: PositionSchema,
+  to: PositionSchema,
+  uci: z.string().min(1, "UCI notation is required"),
+  captured: z.string().optional(),
+  promotion: z.string().optional(),
+  castling: z.enum(["kingside", "queenside"]).optional(),
+  enPassant: z.boolean().optional()
+})
+
+export const OpeningNodeSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    id: z.string().min(1, "Node ID is required"),
+    move: OpeningMoveSchema.nullable(),
+    fen: z.string().min(1, "FEN string is required"),
+    comment: z.string().optional(),
+    evaluation: z.number().optional(),
+    isMainLine: z.boolean().default(false),
+    priority: z.number().int().min(1).max(10).default(5),
+    children: z.array(OpeningNodeSchema).default([]),
+    stats: z
+      .object({
+        games: z.number().int().min(0).default(0),
+        whiteWins: z.number().int().min(0).default(0),
+        draws: z.number().int().min(0).default(0),
+        blackWins: z.number().int().min(0).default(0)
+      })
+      .optional(),
+    tags: z.array(z.string()).default([]),
+    lastUpdated: z.date().default(() => new Date())
+  })
+)
+
+export const RepertoireMetadataSchema = z.object({
+  totalPositions: z.number().int().min(0).default(0),
+  maxDepth: z.number().int().min(0).default(0),
+  source: z.enum(["manual", "pgn_import", "lichess"]).default("manual"),
+  version: z.number().int().min(1).default(1)
+})
+
+export const CreateRepertoireRequestSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters").trim(),
+    description: z
+      .string()
+      .max(500, "Description must be less than 500 characters")
+      .trim()
+      .optional()
+      .transform((val) => val || undefined),
+    color: z.enum(["white", "black"]),
+    rootNode: OpeningNodeSchema,
+    isPublic: z.boolean().default(false),
+    tags: z.array(z.string()).default([]),
+    metadata: RepertoireMetadataSchema.optional()
+  })
+  .transform((obj) => {
+    // Remove undefined properties to match domain interface expectations
+    const result: any = {
+      name: obj.name,
+      color: obj.color,
+      rootNode: obj.rootNode,
+      isPublic: obj.isPublic,
+      tags: obj.tags
+    }
+    if (obj.description !== undefined) result.description = obj.description
+    if (obj.metadata !== undefined) result.metadata = obj.metadata
+    return result
+  })
+
+export const UpdateRepertoireRequestSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters").trim().optional(),
+    description: z.string().max(500, "Description must be less than 500 characters").trim().optional(),
+    color: z.enum(["white", "black"]).optional(),
+    rootNode: OpeningNodeSchema.optional(),
+    isPublic: z.boolean().optional(),
+    tags: z.array(z.string()).optional(),
+    metadata: RepertoireMetadataSchema.partial().optional()
+  })
+  .transform((obj) => {
+    // Remove undefined properties to match Partial<T> expectations
+    const result: any = {}
+    if (obj.name !== undefined) result.name = obj.name
+    if (obj.description !== undefined) result.description = obj.description
+    if (obj.color !== undefined) result.color = obj.color
+    if (obj.rootNode !== undefined) result.rootNode = obj.rootNode
+    if (obj.isPublic !== undefined) result.isPublic = obj.isPublic
+    if (obj.tags !== undefined) result.tags = obj.tags
+    if (obj.metadata !== undefined) result.metadata = obj.metadata
+    return result
+  })
+
+export const ImportPgnRequestSchema = z
+  .object({
+    pgn: z.string().min(1, "PGN content is required"),
+    name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters").trim(),
+    description: z.string().max(500, "Description must be less than 500 characters").trim().optional(),
+    color: z.enum(["white", "black"])
+  })
+  .transform((obj) => {
+    // Remove undefined properties to match interface expectations
+    const result: any = {
+      pgn: obj.pgn,
+      name: obj.name,
+      color: obj.color
+    }
+    if (obj.description !== undefined) result.description = obj.description
+    return result
+  })
+
 // Export types from schemas
 export type CreateGameRequestDto = z.infer<typeof CreateGameRequestSchema>
 export type MakeMoveRequestDto = z.infer<typeof MakeMoveRequestSchema>
@@ -187,6 +356,28 @@ export type GameListItemDto = z.infer<typeof GameListItemSchema>
 export type GameHistoryItemDto = z.infer<typeof GameHistoryItemSchema>
 export type ActiveGamesResponseDto = z.infer<typeof ActiveGamesResponseSchema>
 export type GameHistoryResponseDto = z.infer<typeof GameHistoryResponseSchema>
+
+// Popular openings DTOs
+export type PopularOpeningsQueryDto = z.infer<typeof PopularOpeningsQuerySchema>
+export type SearchOpeningsQueryDto = z.infer<typeof SearchOpeningsQuerySchema>
+export type DifficultyParamDto = z.infer<typeof DifficultyParamSchema>
+
+// Opening-specific DTOs
+export type RepertoireIdParamDto = z.infer<typeof RepertoireIdParamSchema>
+export type SessionIdParamDto = z.infer<typeof SessionIdParamSchema>
+export type RepertoireAndNodeIdParamDto = z.infer<typeof RepertoireAndNodeIdParamSchema>
+export type FenParamDto = z.infer<typeof FenParamSchema>
+export type PublicRepertoiresQueryDto = z.infer<typeof PublicRepertoiresQuerySchema>
+export type UserSessionsQueryDto = z.infer<typeof UserSessionsQuerySchema>
+export type PositionsDueQueryDto = z.infer<typeof PositionsDueQuerySchema>
+
+// Opening repertoire DTOs
+export type CreateRepertoireRequestDto = z.infer<typeof CreateRepertoireRequestSchema>
+export type UpdateRepertoireRequestDto = z.infer<typeof UpdateRepertoireRequestSchema>
+export type ImportPgnRequestDto = z.infer<typeof ImportPgnRequestSchema>
+export type OpeningMoveDto = z.infer<typeof OpeningMoveSchema>
+export type OpeningNodeDto = z.infer<typeof OpeningNodeSchema>
+export type RepertoireMetadataDto = z.infer<typeof RepertoireMetadataSchema>
 
 // Authentication DTOs
 export type RegisterRequestDto = z.infer<typeof RegisterRequestSchema>

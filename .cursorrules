@@ -68,6 +68,9 @@ interface GameStateActions {
 - **Never use `any`** - Always use proper typing. If unsure, create a specific interface or use `unknown`
 - **No nested types** - Create new types for each level of complexity
 - **Avoid inline objects** - Use existing interfaces/types or create new ones locally
+- **Minimize type assertions** - Avoid excessive use of `as string`, `as number`, etc. Use Zod schemas for validation and parsing instead
+- **Use Zod for validation** - Always use Zod schemas for request validation, query parsing, and type safety
+- **No custom parsing utilities** - Use Zod's built-in coercion and transformation instead of manual parsing
 
 ### ✅ Good Example:
 
@@ -84,9 +87,122 @@ const validateMove = (params: MoveValidationParams): boolean => {
   // Implementation
 }
 
+// ✅ Use Zod schemas for validation and parsing
+export const PublicRepertoiresQuerySchema = z.object({
+  tags: z.string().or(z.array(z.string())).optional().transform(val => {
+    if (!val) return undefined
+    return Array.isArray(val) ? val : [val]
+  }),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
+})
+
+export const RepertoireIdParamSchema = z.object({
+  repertoireId: z.uuid("Invalid repertoire ID format")
+})
+
+// ✅ Use Zod validation middleware in routes
+router.get("/repertoires/:repertoireId",
+  validateParams(RepertoireIdParamSchema),
+  validateQuery(PublicRepertoiresQuerySchema),
+  controller.getRepertoires
+)
+
+// ✅ Type-safe controller methods
+async getRepertoires(req: Request, res: Response): Promise<void> {
+  const { repertoireId } = req.params as RepertoireIdParamDto
+  const { tags, limit, offset } = req.query as unknown as PublicRepertoiresQueryDto
+  // Zod has already validated and transformed these parameters
+}
+
 // ❌ Avoid inline objects
 const validateMove = (piece: IChessPiece, from: { x: number; y: number }, to: { x: number; y: number }) => {
   // Don't do this
+}
+
+// ❌ Excessive type casting and manual parsing
+const limit = parseInt(req.query.limit as string, 10) // Bad
+const tags = req.query.tags as string[] // Bad
+const parseQueryParams = { /* custom utilities */ } // Bad - use Zod instead
+
+// ❌ Custom validation middleware
+export const validateRepertoireId = (req, res, next) => { /* manual validation */ } // Bad
+```
+
+## 🛡️ Validation with Zod
+
+### Zod Best Practices
+
+- **Always use Zod for validation** - Never create custom validation utilities when Zod can handle it
+- **Define schemas in validation/schemas.ts** - Keep all validation schemas centralized
+- **Use middleware for validation** - Apply `validateParams()`, `validateQuery()`, and `validateBody()` at the route level
+- **Leverage Zod transformations** - Use `.transform()` for data normalization and type coercion
+- **Export TypeScript types** - Use `z.infer<typeof Schema>` to generate TypeScript types
+
+### ✅ Zod Schema Patterns:
+
+```typescript
+// ✅ Parameter validation
+export const UserIdParamSchema = z.object({
+  userId: z.uuid("Invalid user ID format")
+})
+
+// ✅ Query parameter validation with defaults and coercion
+export const PaginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  search: z.string().optional()
+})
+
+// ✅ Complex transformations for array handling
+export const TagsQuerySchema = z.object({
+  tags: z
+    .string()
+    .or(z.array(z.string()))
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined
+      return Array.isArray(val) ? val : [val]
+    })
+})
+
+// ✅ Request body validation
+export const CreateUserRequestSchema = z.object({
+  email: z.string().email("Invalid email format").toLowerCase(),
+  username: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(/^[a-zA-Z0-9_-]+$/),
+  password: z
+    .string()
+    .min(8)
+    .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+})
+
+// ✅ Export types for use in controllers
+export type UserIdParamDto = z.infer<typeof UserIdParamSchema>
+export type PaginationQueryDto = z.infer<typeof PaginationQuerySchema>
+export type CreateUserRequestDto = z.infer<typeof CreateUserRequestSchema>
+```
+
+### ✅ Route Integration:
+
+```typescript
+// ✅ Apply validation middleware at route level
+router.get("/users/:userId", validateParams(UserIdParamSchema), validateQuery(PaginationQuerySchema), controller.getUser)
+
+router.post("/users", validateBody(CreateUserRequestSchema), controller.createUser)
+```
+
+### ✅ Controller Usage:
+
+```typescript
+// ✅ Use validated types directly
+async getUser(req: Request, res: Response): Promise<void> {
+  const { userId } = req.params as UserIdParamDto
+  const { page, limit, search } = req.query as unknown as PaginationQueryDto
+  // All parameters are guaranteed to be validated and properly typed
 }
 ```
 
@@ -286,6 +402,8 @@ These rules apply specifically to backend service classes to ensure consistent d
 - **Static builder pattern** - Each service should have a static `build()` method for dependency instantiation
 - **Builder placement** - The static `build()` method must always be the last function in the class
 - **Method organization** - Always place all private functions below all interface and public functions in service classes
+- **NO require() in build methods** - Always use ES6 imports at the top of the file, never use `require()` inside build methods
+- **Import dependencies properly** - All service dependencies must be imported using ES6 import syntax
 
 ### ✅ Good Example:
 
@@ -300,6 +418,9 @@ export interface GameServiceInterface {
 
 // GameService.ts
 import { GameServiceInterface } from "./gameService.interface"
+import { GameRepository } from "./GameRepository"
+import { IdGenerator } from "./IdGenerator"
+import { Logger } from "./Logger"
 
 export class GameService implements GameServiceInterface {
   constructor(
@@ -347,18 +468,25 @@ export class GameService implements GameServiceInterface {
     // Implementation details
   }
 
-  // Static build method - always last
+  // Static build method - always last with proper ES6 imports
   static build(): GameService {
     return new GameService(GameRepository.build(), IdGenerator.build(), Logger.build())
   }
 }
 
-// ❌ Bad example - no interface, no dependency injection
+// ❌ Bad example - no interface, no dependency injection, require() usage
 export class GameService {
   async createGame(): Promise<Game> {
     const gameRepository = new GameRepository() // Direct instantiation
     const id = Math.random().toString() // No abstraction
     // ...
+  }
+
+  // ❌ Never use require() in build methods
+  static build(): GameService {
+    const { GameRepository } = require("./GameRepository") // BAD!
+    const { IdGenerator } = require("./IdGenerator") // BAD!
+    return new GameService(GameRepository.build(), IdGenerator.build())
   }
 }
 ```

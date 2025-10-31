@@ -1,11 +1,17 @@
 // Query client and configuration
 export * from "./queryClient"
 export * from "./queryKeys"
+export * from "./apiClient"
 
-// Queries
+// API modules - complete exports
+export * from "./auth.api"
+export * from "./game.api"
+
+// Opening API (keeping existing structure)
+export * from "./opening.api"
+
+// Legacy compatibility exports (for remaining opening queries/mutations)
 export * from "./queries"
-
-// Mutations
 export * from "./mutations"
 
 // Integration hooks

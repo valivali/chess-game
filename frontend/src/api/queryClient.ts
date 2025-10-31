@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query"
 
-import { authService } from "../services/authService"
+import { tokenManager } from "./auth.api"
 
 /**
  * QueryClient configuration for the Chess Game application
@@ -36,8 +36,8 @@ export const queryClient = new QueryClient({
         if (error?.status === 401 || error?.message?.includes("Authentication")) {
           // Clear all cached data on auth errors
           queryClient.clear()
-          // Let AuthContext handle the logout
-          authService.logout()
+          // Clear tokens on auth errors
+          tokenManager.clearTokens()
         }
       },
       // Retry mutations once on network errors

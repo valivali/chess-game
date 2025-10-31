@@ -2,7 +2,7 @@ import type { User } from "../../types/user.types"
 import type { INavElement } from "../ui/sidenav"
 
 export interface IConnectedHeaderProps {
-  user: User
+  user: User | null
   onMenuToggle?: () => void
   appName?: string
   navElements?: INavElement[]
@@ -10,7 +10,7 @@ export interface IConnectedHeaderProps {
 }
 
 export interface IUserProfileProps {
-  user: User
+  user: User | null
 }
 
 export interface IHamburgerMenuProps {
